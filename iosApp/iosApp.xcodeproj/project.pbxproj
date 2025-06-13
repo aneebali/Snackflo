@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
-		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
+		BA3C75AC2DFC90BC001A32F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
+		BA3C75AD2DFC90CB001A32F2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		BA762BCC2DFB037200E17648 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BA762BCB2DFB037200E17648 /* GoogleService-Info.plist */; };
 		BA762BCF2DFB05FF00E17648 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BA762BCE2DFB05FF00E17648 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
@@ -161,8 +161,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
-				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
+				BA3C75AD2DFC90CB001A32F2 /* Preview Assets.xcassets in Resources */,
+				BA3C75AC2DFC90BC001A32F2 /* Assets.xcassets in Resources */,
 				BA762BCC2DFB037200E17648 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
