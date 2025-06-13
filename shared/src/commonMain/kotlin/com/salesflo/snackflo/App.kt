@@ -9,10 +9,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cmppreference.LocalPreference
 import com.example.cmppreference.LocalPreferenceProvider
 import com.salesflo.snackflo.admin.AdminDashboardScreen
+import com.salesflo.snackflo.auth.ForgotPasswordScreen
 import com.salesflo.snackflo.auth.LoginScreen
 import com.salesflo.snackflo.auth.SignUpScreen
 import com.salesflo.snackflo.employee.EmployeeFoodListScreen
-import com.salesflo.snackflo.employee.ItemScreenList
+import com.salesflo.snackflo.employee.RestaurantExpansionScreen
 import com.salesflo.snackflo.repository.AuthResult
 
 
@@ -24,6 +25,7 @@ fun App() {
 }
 
 
+
 @Composable
 fun StartupApp() {
 
@@ -33,17 +35,30 @@ fun StartupApp() {
 
 
         NavHost(navController = navController, startDestination = "splash") {
-            val isLoggedIn = preference.getInt("login", 0) == 1
+            val isLoggedIn = preference.getInt(NavigationPaths.LoginScreen, 0) == 1
+            //  val isEmployeeType = (preference.getString("userType") ?: "") == AppConstant.EMPLOYEE_TYPE
+
 
             composable("splash") {
                 LaunchedEffect(Unit) {
-
+                    val isEmployee = (preference.getString("userType") ?: "") == AppConstant.EMPLOYEE_TYPE
                     if (isLoggedIn) {
-                        navController.navigate("home") {
-                            popUpTo("splash") { inclusive = true }
+                        if(isEmployee){
+                            navController.navigate(NavigationPaths.Home) {
+                                popUpTo("splash") { inclusive = true }
+                            }
+
                         }
+                        else{
+                            navController.navigate(NavigationPaths.AdminScreen) {
+                                popUpTo("splash") { inclusive = true }
+                            }
+
+
+                        }
+
                     } else {
-                        navController.navigate("login") {
+                        navController.navigate(NavigationPaths.LoginScreen) {
                             popUpTo("splash") { inclusive = true }
                         }
                     }
@@ -51,80 +66,96 @@ fun StartupApp() {
 
             }
 
-            composable("login") {
+            composable(NavigationPaths.LoginScreen) {
+
                 LoginScreen(
-                    onSignUpClick = { navController.navigate("signup") },
-                    onLoginSuccess = { authResult: AuthResult ->
-                        preference.put("login", 1)
+                    onSignUpClick = { navController.navigate(NavigationPaths.CreateAccount) },
+                    onForgotPassClick = { navController.navigate("Forgot Password")},
+                    onLoginSuccess = {   authResult: AuthResult ->
+
+                        preference.put(NavigationPaths.LoginScreen, 1)
                         preference.put("userType", authResult.userType.toString())
-                        preference.put("username", authResult.username.toString())
-                        preference.put("userId", authResult.userId.toString())
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
+                        preference.put("username" , authResult.username.toString())
+                        preference.put("userId" , authResult.userId.toString())
+                        val isEmployee = authResult.userType == AppConstant.EMPLOYEE_TYPE
+
+                        if(isEmployee){
+                            navController.navigate(NavigationPaths.Home) {
+                                popUpTo(NavigationPaths.LoginScreen) { inclusive = true }
+                            }
+
                         }
+                        else{
+                            navController.navigate(NavigationPaths.AdminScreen) {
+                                popUpTo(NavigationPaths.LoginScreen) { inclusive = true }
+                            }
+                        }
+
                     }
                 )
             }
 
-            composable("signup") {
+            composable(NavigationPaths.CreateAccount) {
                 SignUpScreen(
-                    onLoginClick = { navController.navigate("login") },
+                    onLoginClick = { navController.navigate(NavigationPaths.LoginScreen) },
                     onBackClick = { navController.popBackStack() }
                 )
             }
+            composable ("Forgot Password"){
+                ForgotPasswordScreen( onBackClick = { navController.popBackStack() })
+            }
 
-            composable("home") {
-
-
-                val isEmployeeType =
-                    (preference.getString("userType") ?: "") == AppConstant.EMPLOYEE_TYPE
+            composable(NavigationPaths.Home) {
                 val userId = preference.getString("userId") ?: ""
+                EmployeeFoodListScreen(
+                    userId = userId.toString(),
+                    onFabClick = { navController.navigate(NavigationPaths.AddItemsScreen) },
+                    onLogOut = {
+                        preference.put(NavigationPaths.LoginScreen, 0)
+                        preference.put("userType", "")
+                        preference.put("username", "")
+                        preference.put("userId", "")
 
-                if (isEmployeeType)
-
-                    EmployeeFoodListScreen(
-                        userId = userId.toString(),
-                        onFabClick = { navController.navigate("AddItems") },
-                        onLogOut = {
-                            navController.navigate("login") {
-                                popUpTo(navController.graph.startDestinationRoute ?: "splash") {
-                                    inclusive = true
-                                }
-                            }
-                        },
-
-                        )
-                else
-                    AdminDashboardScreen(
-
-                        onLogOut = {
-                            //  val sharedPreferences = context.getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
-                            //  sharedPreferences.edit().clear().apply()
-
-                            navController.navigate("login") {
-                                popUpTo(navController.graph.startDestinationRoute ?: "splash") {
-                                    inclusive = true
-                                }
-
-                                launchSingleTop = true
-                            }
-
-
+//                        while (navController.popBackStack()) {
+//                            // keep popping
+//                        }
+                        navController.navigate(NavigationPaths.LoginScreen) {
+                            popUpTo(NavigationPaths.Home) { inclusive = true }
+                            launchSingleTop = true
                         }
+
+//                        navController.navigate(NavigationPaths.LoginScreen) {
+//                            popUpTo(navController.graph.startDestinationRoute!!) {
+//                                inclusive = true
+//                            }
+//                        }
+                    },
+
                     )
             }
+            composable(NavigationPaths.AdminScreen) {
+                AdminDashboardScreen(
+                    onLogOut = {
+                        preference.put(NavigationPaths.LoginScreen, 0)
+                        preference.put("userType", "")
+                        preference.put("username", "")
+                        preference.put("userId", "")
 
-            composable("AddItems") {
-                ItemScreenList(onArrowClick = { navController.popBackStack() })
+                        navController.navigate(NavigationPaths.LoginScreen) {
+                            popUpTo(NavigationPaths.AdminScreen) { inclusive = true }
+                            launchSingleTop = true
+                        }
+
+                    }
+                )
             }
+
+            composable(NavigationPaths.AddItemsScreen) {
+                RestaurantExpansionScreen(
+                    onArrowClick = { navController.popBackStack() }
+                )
+            }
+
         }
     }
 }
-
-
-
-
-
-
-
-

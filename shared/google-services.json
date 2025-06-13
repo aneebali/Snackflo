@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "800135102760",
+    "project_id": "lunchbookingapp-72b8e",
+    "storage_bucket": "lunchbookingapp-72b8e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800135102760:android:a52fa0fbb14a137c44d01d",
+        "android_client_info": {
+          "package_name": "com.salesflo.lunch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6qmw52KcV-yFIkSrqlINCrPNOszHZirc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800135102760:android:1e5b4531d67c19b344d01d",
+        "android_client_info": {
+          "package_name": "com.salesflo.snackflo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6qmw52KcV-yFIkSrqlINCrPNOszHZirc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
