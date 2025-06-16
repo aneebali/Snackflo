@@ -66,13 +66,9 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(compose.materialIconsExtended)
 
-            // AndroidX
+            // AndroidX Compose
             implementation(libs.androidx.core.i18n)
             implementation(libs.androidx.navigation.compose)
-            /*implementation(libs.androidx.core.i18n)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.androidx.navigation.compose)*/
 
             // Firebase (GitLive KMP)
             implementation(libs.firebase.firestore)
