@@ -1,4 +1,6 @@
 package com.salesflo.snackflo.employee
+
+import AppPreferences
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -67,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.SubcomposeAsyncImage
-import com.example.cmppreference.LocalPreference
 import com.salesflo.snackflo.repository.EmployeeViewModel
 import com.salesflo.snackflo.repository.Item
 import com.salesflo.snackflo.repository.RestaurantViewModel
@@ -84,9 +85,10 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun RestaurantExpansionScreen(
     viewModel: RestaurantViewModel = RestaurantViewModel(),
-    onArrowClick: () -> Unit,employeeViewModel: EmployeeViewModel = viewModel()
+    onArrowClick: () -> Unit, employeeViewModel: EmployeeViewModel = viewModel()
 ) {
-    val restaurantsWithItems by viewModel.getRestaurantsWithItems().collectAsState(initial = emptyList())
+    val restaurantsWithItems by viewModel.getRestaurantsWithItems()
+        .collectAsState(initial = emptyList())
     val uiState by viewModel.uiState
     var isSubmitting by remember { mutableStateOf(false) }
     val selectedItems = remember { mutableStateMapOf<String, SelectedOrderItems>() }
@@ -157,7 +159,7 @@ fun RestaurantExpansionScreen(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
 
-                placeholder = { Text("search")},
+                placeholder = { Text("search") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -181,13 +183,14 @@ fun RestaurantExpansionScreen(
                     focusedLeadingIconColor = Color.Gray,
                     unfocusedLeadingIconColor = Color.Gray
                 )
-                )
+            )
 
             val filteredList = if (searchQuery.isBlank()) {
                 restaurantsWithItems
             } else {
                 restaurantsWithItems.mapNotNull { restaurant ->
-                    val matchesRestaurant = restaurant.restaurant.name.contains(searchQuery, ignoreCase = true)
+                    val matchesRestaurant =
+                        restaurant.restaurant.name.contains(searchQuery, ignoreCase = true)
                     val matchingItems = restaurant.items.filter {
                         it.name.contains(searchQuery, ignoreCase = true)
                     }
@@ -332,7 +335,6 @@ fun RestaurantCard(
                     ) {
 
 
-
                         Text(
                             text = restaurantWithItems.restaurant.name
                                 .takeIf { it.isNotEmpty() }
@@ -415,7 +417,6 @@ fun RestaurantCard(
 }
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemCard(
@@ -429,7 +430,7 @@ fun ItemCard(
             "paao" -> listOf("0", "0.5 kg", "1 kg", "1.5 kg", "2 kg", "2.5 kg", "3 kg")
             "quantity" -> (0..10).map { it.toString() }
             "half" -> listOf("0", "Half", "Full")
-            "kg" -> listOf("0", "1 paao", "1.5 paao","0.5 kilo", "1 kilo","1.5 kilo", "2 kilo")
+            "kg" -> listOf("0", "1 paao", "1.5 paao", "0.5 kilo", "1 kilo", "1.5 kilo", "2 kilo")
             else -> listOf("0", "1", "2", "3", "4", "5")
 
 
@@ -479,9 +480,6 @@ fun ItemCard(
     }
 
 
-
-
-
     fun LocalTime.withoutNanoseconds(): LocalTime =
         LocalTime(hour, minute, second)
 
@@ -501,9 +499,7 @@ fun ItemCard(
 
     val quantityOptions = getQuantityOptionsForUnit(item.unit)
 
-    val preference = LocalPreference.current
-    val name = preference.getString("username") ?: ""
-    val id = preference.getString("userId") ?: ""
+    val id = AppPreferences.userId
 
     Card(
         modifier = modifier.fillMaxWidth(),

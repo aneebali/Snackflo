@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeCompiler)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.googleServices)
 }
 
 android {
@@ -35,6 +35,9 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.10" // Match your Compose version
+    }
 }
 
 dependencies {
@@ -43,9 +46,9 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
-    implementation("com.google.firebase:firebase-common-ktx:21.0.0")
-    implementation("network.chaintech:cmp-preference:1.0.0")
-
-    debugImplementation(libs.compose.ui.tooling)
     implementation(libs.androidx.core.i18n)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.firebase.common.ktx)
+    debugImplementation(libs.compose.ui.tooling)
 }

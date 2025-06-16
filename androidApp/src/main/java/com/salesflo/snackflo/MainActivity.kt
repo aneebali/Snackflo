@@ -1,5 +1,6 @@
 package com.salesflo.snackflo
 
+import PlatformSettingsProvider
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ class MainActivity : ComponentActivity() {
             Firebase.initialize(this)
             initializeContext(applicationContext)
             initContext(applicationContext)
+            PlatformSettingsProvider.applicationContext = applicationContext
             App()
         }
     }

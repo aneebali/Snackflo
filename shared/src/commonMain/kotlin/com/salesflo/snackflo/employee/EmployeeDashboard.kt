@@ -1,5 +1,6 @@
 package com.salesflo.snackflo.employee
 
+import AppPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,8 +55,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.example.cmppreference.LocalPreference
 import com.salesflo.snackflo.DatePickerDemo
+import com.salesflo.snackflo.repository.SelectedOrderItems
 import com.salesflo.snackflo.repository.formatDateKMP
 import com.salesflo.snackflo.repository.getOrdersForUserByDate
 import kotlinx.coroutines.launch
@@ -63,7 +64,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import com.salesflo.snackflo.repository.SelectedOrderItems
 
 
 @Composable
@@ -74,17 +74,17 @@ fun EmployeeFoodListScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val preference = LocalPreference.current
     var orders by remember { mutableStateOf<List<SelectedOrderItems>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-   // var selectedDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val totalPrice = orders.sumOf {  it.price }
+    // var selectedDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val totalPrice = orders.sumOf { it.price }
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember {
         mutableStateOf(
             Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         )
     }
+
     fun LocalTime.withoutNanoseconds(): LocalTime =
         LocalTime(hour, minute, second)
 
@@ -160,8 +160,7 @@ fun EmployeeFoodListScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    val name = preference.getString("username") ?: ""
-                    val id = preference.getString("userId") ?: ""
+                    val name = AppPreferences.userName
 
                     Text(
                         text = name,
@@ -234,7 +233,7 @@ fun EmployeeFoodListScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Surface(
-                        onClick = {  scope.launch { drawerState.open() } },
+                        onClick = { scope.launch { drawerState.open() } },
                         shape = RoundedCornerShape(12.dp),
                         color = Color(0xFFFF7F50).copy(alpha = 0.1f),
                         modifier = Modifier.align(Alignment.CenterStart)
@@ -357,13 +356,12 @@ fun EmployeeFoodListScreen(
                 onDismiss = { showDatePicker = false },
                 onDateSelected = { date ->
                     selectedDate = date
-                  //  onDateSelected(selectedDate)
+                    //  onDateSelected(selectedDate)
 
                 })
         }
     }
 }
-
 
 
 @Composable
@@ -372,10 +370,10 @@ fun EmployeeOrderHistoryCard(
     title: String,
     description: String,
     quantity: String,
-  //  status: String,
+    //  status: String,
     price: Int,
-    date : String,
-   // reason: String
+    date: String,
+    // reason: String
 
 ) {
     Card(
@@ -399,7 +397,7 @@ fun EmployeeOrderHistoryCard(
                 Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text("Qty: $quantity", fontSize = 14.sp)
                 Text("Price: Rs. $price", fontSize = 14.sp)
-             //   Text("Total: Rs. ${price.toInt() * quantity.toInt()}", fontSize = 14.sp)
+                //   Text("Total: Rs. ${price.toInt() * quantity.toInt()}", fontSize = 14.sp)
                 if (description.isNotBlank()) {
                     Text("Note: $description", fontSize = 14.sp)
                 }

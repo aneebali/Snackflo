@@ -5,7 +5,6 @@ import android.os.Build
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import com.example.cmppreference.AppContext
 import org.json.JSONObject
 import java.net.Inet4Address
 import java.net.NetworkInterface
@@ -26,7 +25,6 @@ lateinit var applicationContext: Context
 
 fun initializeContext(context: Context) {
     applicationContext = context
-    AppContext.apply { set(context) }
 }
 
 // androidMain

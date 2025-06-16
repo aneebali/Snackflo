@@ -1,5 +1,6 @@
 package com.salesflo.snackflo.admin
 
+import AppPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,7 +55,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cmppreference.LocalPreference
 import com.salesflo.snackflo.DatePickerDemo
 import com.salesflo.snackflo.repository.EmployeeOrder
 import com.salesflo.snackflo.repository.OrderViewModel
@@ -76,7 +76,6 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
     var currentScreen by remember { mutableStateOf("Admin") }
 
     val scope = rememberCoroutineScope()
-    val preference = LocalPreference.current
 
     var isLoading by remember { mutableStateOf(true) }
 
@@ -160,8 +159,7 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    val name = preference.getString("username") ?: ""
-                    val id = preference.getString("userId") ?: ""
+                    val name = AppPreferences.userName
 
                     Text(
                         text = name,
