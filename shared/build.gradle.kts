@@ -19,14 +19,19 @@ kotlin {
         }
     }
 
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
-            baseName = "shared"
-            isStatic = true
+    val iosTargets = listOf(iosArm64(), iosX64(), iosSimulatorArm64())
+    iosTargets.forEach { target ->
+        target.binaries {
+            executable {
+                // Set minimum iOS version to 14.1
+                linkerOpts("-ios_version_min 14.1")
+            }
+            // For framework builds (if needed)
+            framework {
+                baseName = "shared"
+                isStatic = true
+                linkerOpts("-ios_version_min 14.1")
+            }
         }
     }
 
