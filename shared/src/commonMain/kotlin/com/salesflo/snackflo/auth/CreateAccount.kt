@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.salesflo.snackflo.FullDeviceInfo
 import com.salesflo.snackflo.getFullDeviceInfo
 import com.salesflo.snackflo.showToast
@@ -94,10 +95,11 @@ fun SignUpScreen(
 
 
         IconButton(
-            onClick = onBackClick,
+            onClick =   onLoginClick,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 16.dp, top = 16.dp)
+                .zIndex(1f)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -111,8 +113,8 @@ fun SignUpScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-              //  .imePadding()
-                .padding(top = 200.dp),
+                .padding(top = 200.dp, bottom = 24.dp)
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Card(
@@ -267,7 +269,12 @@ fun SignUpScreen(
                     "Login here",
                     color = Color(0xFFFF7F50),
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.clickable { onLoginClick() }
+                    modifier = Modifier.clickable {
+
+
+                        onLoginClick()
+
+                    }
                 )
             }
         }
