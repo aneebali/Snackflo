@@ -81,7 +81,7 @@ import kotlin.collections.component2
 
 @Composable
 fun OrderManagementScreen(
-    viewModel: OrderViewModel = viewModel(),
+    viewModel: OrderViewModel = viewModel{OrderViewModel()},
     selectedDate: LocalDate
 ) {
     val orderItems by viewModel.orderItems.collectAsState()
@@ -248,7 +248,6 @@ fun RestaurantOrderScreen(
             }
         }
 
-        // Show submit button only when all conditions are met and not yet submitted
         if (allPricesFilled && anyPriceGreaterThanZero && !submitted) {
             Button(
                 onClick = {
@@ -262,7 +261,7 @@ fun RestaurantOrderScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(top = 10.dp, bottom = 70.dp, start = 10.dp, end = 10.dp)
+                    .padding(top = 10.dp, bottom = 30.dp, start = 10.dp, end = 10.dp)
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7F50))
             ) {

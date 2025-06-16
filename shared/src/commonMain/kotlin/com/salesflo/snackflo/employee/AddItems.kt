@@ -84,7 +84,7 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun RestaurantExpansionScreen(
     viewModel: RestaurantViewModel = RestaurantViewModel(),
-    onArrowClick: () -> Unit,employeeViewModel: EmployeeViewModel = viewModel()
+    onArrowClick: () -> Unit,employeeViewModel: EmployeeViewModel = viewModel {EmployeeViewModel()}
 ) {
     val restaurantsWithItems by viewModel.getRestaurantsWithItems().collectAsState(initial = emptyList())
     val uiState by viewModel.uiState

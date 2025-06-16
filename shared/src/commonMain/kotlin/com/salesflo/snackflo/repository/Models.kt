@@ -8,10 +8,7 @@ data class UserOrderSummary(
     val totalQuantity: Int
 )
 
-data class FoodOrder(
-    val foodName: String,
-    val orders: List<EmployeeOrder>
-)
+
 @Serializable
 data class EmployeeOrder(
     val employeeName: String,

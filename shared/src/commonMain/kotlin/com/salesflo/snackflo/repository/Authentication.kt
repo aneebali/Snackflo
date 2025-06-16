@@ -1,6 +1,6 @@
 package com.salesflo.snackflo.repository
 
-import com.salesflo.snackflo.AppConstant
+import com.salesflo.snackflo.common.AppConstant
 import com.salesflo.snackflo.showToast
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
@@ -13,7 +13,7 @@ object AuthFunc {
         val db = Firebase.firestore
         try {
 
-            val docRef = db.collection(AppConstant.AuthTableName).document(userId)
+            val docRef = db.collection(AppConstant.USERS).document(userId)
             val snapshot = docRef.get()
 
             if (snapshot.exists) {
@@ -31,11 +31,11 @@ object AuthFunc {
         val db = Firebase.firestore
         try {
 
-            val docRef = db.collection(AppConstant.AuthTableName).document(mobileNo)
+            val docRef = db.collection(AppConstant.USERS).document(mobileNo)
             val snapshot = docRef.get()
 
             if (snapshot.exists) {
-                docRef.update(AppConstant.passFieldName to password)
+                docRef.update(AppConstant.PASSWORD to password)
                 return  true
             } else {
               return  false
@@ -58,14 +58,14 @@ object AuthFunc {
         val db = Firebase.firestore
         try {
             val data = mapOf(
-                AppConstant.usernameFieldName to username,
-                AppConstant.mobileFieldName to mobileNo,
-                AppConstant.passFieldName to password,
-                AppConstant.userType to AppConstant.EMPLOYEE_TYPE,
+                AppConstant.USERNAME to username,
+                AppConstant.MOBILE to mobileNo,
+                AppConstant.PASSWORD to password,
+                AppConstant.USERTYPE to AppConstant.EMPLOYEE_TYPE,
                 AppConstant.DEVICE_INFO to deviceName
             )
 
-            db.collection(AppConstant.AuthTableName)
+            db.collection(AppConstant.USERS)
                 .document(mobileNo)
                 .set(data)
 
@@ -83,9 +83,9 @@ object AuthFunc {
     suspend fun authenticateUser(password: String, mobileNo: String , deviceName : String,): AuthResult {
         val db = Firebase.firestore
         return try {
-            val result = db.collection(AppConstant.AuthTableName)
-                .where("mobileNo", equalTo = mobileNo)
-                .where("password", equalTo = password)
+            val result = db.collection(AppConstant.USERS)
+                .where(AppConstant.MOBILE, equalTo = mobileNo)
+                .where(AppConstant.PASSWORD, equalTo = password)
                 .get()
 
             for (doc in result.documents) {
@@ -98,9 +98,9 @@ object AuthFunc {
 
             if (result.documents.isNotEmpty()) {
                 val document = result.documents[0]
-                val userType: String? = document.get(AppConstant.userType)
-                val username: String? = document.get(AppConstant.usernameFieldName)
-                val isDeviceFlag: Int = document.get(AppConstant.DEVICE_INFO_Flag)
+                val userType: String? = document.get(AppConstant.USERTYPE)
+                val username: String? = document.get(AppConstant.USERNAME)
+                val isDeviceFlag: Int = document.get(AppConstant.DEVICE_INFO_FlAG)
                 println(username)
                 println(userType)
                 if(isDeviceFlag == 1){
@@ -136,8 +136,8 @@ object AuthFunc {
     ) {
         val db = Firebase.firestore
         try {
-            val result = db.collection(AppConstant.AuthTableName)
-                .where(AppConstant.mobileFieldName, equalTo =  mobileNo)
+            val result = db.collection(AppConstant.USERS)
+                .where(AppConstant.MOBILE, equalTo =  mobileNo)
                 .get()
 
 
