@@ -1,4 +1,4 @@
-package com.salesflo.snackflo
+package com.salesflo.snackflo.common
 
 object NavigationPaths {
     const val AdminScreen : String =  "Admin"
@@ -6,6 +6,4 @@ object NavigationPaths {
     const val AddItemsScreen : String =  "OrderItemsScreen"
     const val LoginScreen : String =  "login"
     const val CreateAccount : String =  "signup"
-
-
 }

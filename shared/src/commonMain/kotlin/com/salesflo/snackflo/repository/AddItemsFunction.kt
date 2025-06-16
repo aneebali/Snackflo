@@ -2,6 +2,7 @@ package com.salesflo.snackflo.repository
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.salesflo.snackflo.common.AppConstant
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,7 @@ class RestaurantRepository {
     private val firestore = Firebase.firestore
 
     fun getRestaurants(): Flow<List<Restaurant>> {
-        return firestore.collection("Restaurant")
+        return firestore.collection(AppConstant.RESTAURANT)
             .snapshots
             .map { snapshot ->
                 snapshot.documents.mapNotNull { doc ->
@@ -28,7 +29,7 @@ class RestaurantRepository {
     }
 
     fun getItems(): Flow<List<Item>> {
-        return firestore.collection("Items")
+        return firestore.collection(AppConstant.ITEMS_LIST)
             .snapshots
             .map { snapshot ->
                 snapshot.documents.mapNotNull { doc ->

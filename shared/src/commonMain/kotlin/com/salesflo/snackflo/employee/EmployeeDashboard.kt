@@ -56,14 +56,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.salesflo.snackflo.DatePickerDemo
-import com.salesflo.snackflo.repository.SelectedOrderItems
-import com.salesflo.snackflo.repository.formatDateKMP
+import com.salesflo.snackflo.common.formatDateKMP
 import com.salesflo.snackflo.repository.getOrdersForUserByDate
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.salesflo.snackflo.repository.SelectedOrderItems
 
 
 @Composable
@@ -219,16 +219,15 @@ fun EmployeeFoodListScreen(
     )
 
     {
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(15.dp)
+                .padding(horizontal =  15.dp, vertical = 10.dp)
         ) {
             Column {
 
-                Spacer(modifier = Modifier.height(25.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -345,7 +344,7 @@ fun EmployeeFoodListScreen(
                 onClick = { onFabClick() },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(bottom = 40.dp, end = 16.dp), // More bottom padding
+                    .padding(bottom = 20.dp, end = 16.dp),
 
                 containerColor = Color(0xFFFF7F50)
             ) {

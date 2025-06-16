@@ -2,6 +2,9 @@ package com.salesflo.snackflo.repository
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.salesflo.snackflo.common.AppConstant
+import com.salesflo.snackflo.common.formatDateKMP
+import com.salesflo.snackflo.common.generateRandomId
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.DocumentSnapshot
 import dev.gitlive.firebase.firestore.FirebaseFirestore
@@ -18,7 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
-import dev.gitlive.firebase.firestore.*
 import kotlinx.coroutines.flow.*
 
 
@@ -35,17 +37,17 @@ class EmployeeViewModel : ViewModel() {
             selectedOrders.forEach { order ->
                 val orderId = generateRandomId()
                 val orderData = mapOf(
-                    "orderId" to orderId,
-                    "userId" to order.empId,
-                    "itemId" to order.Itemid,
-                    "price" to 0,
-                    "quantity" to order.quantity,
+                    AppConstant.ORDER_ID to orderId,
+                    AppConstant.USER_ID to order.empId,
+                    AppConstant.ITEM_ID to order.Itemid,
+                    AppConstant.PRICE to 0,
+                    AppConstant.QUANTITY to order.quantity,
                     "note" to order.note,
-                    "date" to order.date,
-                    "Time" to order.time,
-                    "categoryId" to order.categoryId
+                    AppConstant.DATE to order.date,
+                    AppConstant.TIME to order.time,
+                    AppConstant.CATEGORY_ID to order.categoryId
                 )
-                val docRef = db.collection("Neworders").document(orderId)
+                val docRef = db.collection(AppConstant.NEW_ORDERS).document(orderId)
                 batch.set(docRef, orderData)
             }
 
@@ -70,12 +72,9 @@ suspend fun getTodayOrderSummaryPerUser(
     val db = Firebase.firestore
     val formattedDate = formatDateKMP(date)
 
-    println("DATE")
-    println(formattedDate)
-
     try {
-        val snapshot = db.collection("Neworders")
-            .where("date", equalTo = formattedDate)
+        val snapshot = db.collection(AppConstant.NEW_ORDERS)
+            .where(AppConstant.DATE, equalTo = formattedDate)
             .get()
 
         if (snapshot.documents.isEmpty()) {
@@ -84,8 +83,8 @@ suspend fun getTodayOrderSummaryPerUser(
         }
 
         val orders = snapshot.documents.mapNotNull { doc ->
-            val userId = doc.get<String>("userId")?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-            val price = doc.get<Int>("price") ?: return@mapNotNull null
+            val userId = doc.get<String>(AppConstant.USER_ID)?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            val price = doc.get<Int>(AppConstant.PRICE) ?: return@mapNotNull null
             userId to price
         }
 
@@ -101,7 +100,7 @@ suspend fun getTodayOrderSummaryPerUser(
 
         val result = userSummaries.map { (userId, totalPrice) ->
             val userData = usersMap[userId]
-            val username = userData?.get<String>("username")?.takeIf { it.isNotBlank() } ?: "Unknown User"
+            val username = userData?.get<String>(AppConstant.USERNAME)?.takeIf { it.isNotBlank() } ?: "Unknown User"
 
             UserOrderSummary(
                 userId = userId,
@@ -130,7 +129,7 @@ private suspend fun fetchUsersBatch(
         userIds.map { userId ->
             async {
                 try {
-                    userId to db.collection("Users").document(userId).get()
+                    userId to db.collection(AppConstant.USERS).document(userId).get()
                 } catch (e: Exception) {
                     println("Error fetching user $userId: ${e.message}")
                     userId to null
@@ -152,9 +151,9 @@ fun getOrdersForUserByDate(
     CoroutineScope(Dispatchers.Default).launch {
         try {
             val snapshot = db
-                .collection("Neworders")
-                .where("userId", equalTo = userId)
-                .where("date", equalTo = formattedDate)
+                .collection(AppConstant.NEW_ORDERS)
+                .where(AppConstant.USER_ID, equalTo = userId)
+                .where(AppConstant.DATE, equalTo = formattedDate)
                 .get()
 
             val orders = mutableListOf<SelectedOrderItems>()
@@ -162,17 +161,17 @@ fun getOrdersForUserByDate(
             for (doc in snapshot.documents) {
                 val baseOrder = doc.data<SelectedOrderItems>()
 
-                val itemId = doc.get<String>("itemId") ?: ""
+                val itemId = doc.get<String>(AppConstant.ITEM_ID) ?: ""
                 var itemName = ""
                 var itemPrice = 0
                 var itemImage = ""
 
                 if (itemId.isNotEmpty()) {
-                    val itemDoc = db.collection("Items")
+                    val itemDoc = db.collection(AppConstant.ITEMS_LIST)
                         .document(itemId)
                         .get()
-                    itemName = itemDoc.get<String>("name") ?: ""
-                    itemImage = itemDoc.get<String>("Image") ?: ""
+                    itemName = itemDoc.get<String>(AppConstant.ITEM_NAME) ?: ""
+                    itemImage = itemDoc.get<String>(AppConstant.ITEM_IMAGE) ?: ""
                 }
 
                 val updatedOrder = baseOrder.copy(
@@ -236,23 +235,23 @@ class OrderRepository {
         itemMap: Map<String, String>,
         employeeNames: Map<String, String>
     ): Flow<List<SelectedOrderItems>> {
-        return firestore.collection("Neworders")
-            .where("date", equalTo  = selectedDate)
+        return firestore.collection(AppConstant.NEW_ORDERS)
+            .where(AppConstant.DATE, equalTo  = selectedDate)
             .snapshots
             .map { snapshot ->
                 snapshot.documents.mapNotNull { document ->
                     try {
-                        val itemId = document.get<String>("itemId") ?: ""
+                        val itemId = document.get<String>(AppConstant.ITEM_ID) ?: ""
                         SelectedOrderItems(
-                            Itemid = document.get<String>("itemId") ?: "",
-                            price = document.get<Int>("price") ?: 0,
+                            Itemid = document.get<String>(AppConstant.ITEM_ID) ?: "",
+                            price = document.get<Int>(AppConstant.PRICE) ?: 0,
                             itemName = itemMap[itemId] ?: "Unknown Item",
-                            orderId = document.get<String>("orderId"),
-                            quantity = document.get<String>("quantity") ?: "",
-                            date = document.get<String>("date") ?: "",
-                            time = document.get<String>("Time") ?: "",
-                            empId = document.get<String>("userId") ?: "",
-                            categoryId = document.get<Int>("categoryId") ?: 0
+                            orderId = document.get<String>(AppConstant.ORDER_ID),
+                            quantity = document.get<String>(AppConstant.QUANTITY) ?: "",
+                            date = document.get<String>(AppConstant.DATE) ?: "",
+                            time = document.get<String>(AppConstant.TIME) ?: "",
+                            empId = document.get<String>(AppConstant.USER_ID) ?: "",
+                            categoryId = document.get<Int>(AppConstant.CATEGORY_ID) ?: 0
                         )
                     } catch (e: Exception) {
                         println("Error parsing document: ${e.message}")
@@ -268,12 +267,12 @@ class OrderRepository {
 
     // Employee names flow
     fun getEmployeeNamesFlow(): Flow<Map<String, String>> {
-        return firestore.collection("Users")
+        return firestore.collection(AppConstant.USERS)
             .snapshots
             .map { snapshot ->
                 snapshot.documents.associate { document ->
                     val empId = document.id
-                    val empName = document.get<String>("username") ?: "Unknown Employee"
+                    val empName = document.get<String>(AppConstant.USERNAME) ?: "Unknown Employee"
                     empId to empName
                 }
             }
@@ -285,14 +284,14 @@ class OrderRepository {
 
     // Restaurants flow
     fun getRestaurantsFlow(): Flow<List<Restaurant>> {
-        return firestore.collection("Restaurant")
+        return firestore.collection(AppConstant.RESTAURANT)
             .snapshots
             .map { snapshot ->
                 snapshot.documents.mapNotNull { document ->
                     try {
                         Restaurant(
-                            id = document.get<Int>("id") ?: -1,
-                            name = document.get<String>("name") ?: ""
+                            id = document.get<Int>(AppConstant.RESTAURANT_ID) ?: -1,
+                            name = document.get<String>(AppConstant.RESTAURANT_NAME) ?: ""
                         )
                     } catch (e: Exception) {
                         println("Error parsing restaurant: ${e.message}")
@@ -317,16 +316,15 @@ class OrderRepository {
             }
     }
 
-    // Items flow
     fun getItemsFlow(): Flow<List<Item>> {
-        return firestore.collection("Items")
+        return firestore.collection(AppConstant.ITEMS_LIST)
             .snapshots
             .map { snapshot ->
                 snapshot.documents.mapNotNull { document ->
                     try {
                         Item(
                             id = document.id,
-                            name = document.get<String>("name") ?: ""
+                            name = document.get<String>(AppConstant.ITEM_NAME) ?: ""
                         )
                     } catch (e: Exception) {
                         println("Error parsing item: ${e.message}")
@@ -346,21 +344,21 @@ class OrderRepository {
         selectedDate: String
     ): List<SelectedOrderItems> {
         return try {
-            val snapshot = firestore.collection("Neworders")
+            val snapshot = firestore.collection(AppConstant.NEW_ORDERS)
                 .where("date" , equalTo = selectedDate).get()
             snapshot.documents.mapNotNull { document ->
                 try {
-                    val itemId = document.get<String>("itemId") ?: ""
+                    val itemId = document.get<String>(AppConstant.ITEM_ID) ?: ""
                     SelectedOrderItems(
-                        Itemid = document.get<String>("itemId") ?: "",
-                        price = document.get<Int>("price") ?: 0,
+                        Itemid = document.get<String>(AppConstant.ITEM_ID) ?: "",
+                        price = document.get<Int>(AppConstant.PRICE) ?: 0,
                         itemName = itemMap[itemId] ?: "Unknown Item",
-                        orderId = document.get<String>("orderId"),
-                        quantity = document.get<String>("quantity") ?: "",
-                        date = document.get<String>("date") ?: "",
-                        time = document.get<String>("Time") ?: "",
-                        empId = document.get<String>("userId") ?: "",
-                        categoryId = document.get<Int>("categoryId") ?: 0
+                        orderId = document.get<String>(AppConstant.ORDER_ID),
+                        quantity = document.get<String>(AppConstant.QUANTITY) ?: "",
+                        date = document.get<String>(AppConstant.DATE) ?: "",
+                        time = document.get<String>(AppConstant.TIME) ?: "",
+                        empId = document.get<String>(AppConstant.USER_ID) ?: "",
+                        categoryId = document.get<Int>(AppConstant.CATEGORY_ID) ?: 0
                     )
                 } catch (e: Exception) {
                     println("Error parsing document: ${e.message}")
@@ -375,10 +373,10 @@ class OrderRepository {
 
     suspend fun loadEmployeeNamesFromFirestore(): Map<String, String> {
         return try {
-            val snapshot = firestore.collection("Users").get()
+            val snapshot = firestore.collection(AppConstant.USERS).get()
             snapshot.documents.associate { document ->
                 val empId = document.id
-                val empName = document.get<String>("username") ?: "Unknown Employee"
+                val empName = document.get<String>(AppConstant.USERNAME) ?: "Unknown Employee"
                 empId to empName
             }
         } catch (e: Exception) {
@@ -389,12 +387,12 @@ class OrderRepository {
 
     suspend fun loadRestaurantsFromFirestore(): List<Restaurant> {
         return try {
-            val snapshot = firestore.collection("Restaurant").get()
+            val snapshot = firestore.collection(AppConstant.RESTAURANT).get()
             snapshot.documents.mapNotNull { document ->
                 try {
                     Restaurant(
-                        id = document.get<Int>("id") ?: -1,
-                        name = document.get<String>("name") ?: ""
+                        id = document.get<Int>(AppConstant.RESTAURANT_ID) ?: -1,
+                        name = document.get<String>(AppConstant.RESTAURANT_NAME) ?: ""
                     )
                 } catch (e: Exception) {
                     println("Error parsing restaurant: ${e.message}")
@@ -413,12 +411,12 @@ class OrderRepository {
 
     suspend fun loadItemsFromFirestore(): List<Item> {
         return try {
-            val snapshot = firestore.collection("Items").get()
+            val snapshot = firestore.collection(AppConstant.ITEMS_LIST).get()
             snapshot.documents.mapNotNull { document ->
                 try {
                     Item(
                         id = document.id,
-                        name = document.get<String>("name") ?: ""
+                        name = document.get<String>(AppConstant.ITEM_NAME) ?: ""
                     )
                 } catch (e: Exception) {
                     println("Error parsing item: ${e.message}")
@@ -458,7 +456,7 @@ class OrderViewModel : ViewModel() {
         _selectedDate.value = selectedDateFormatted
 
         viewModelScope.launch {
-            // Restaurants flow
+
             repository.getRestaurantsFlow()
                 .collect { restaurants ->
                     _restaurants.value = restaurants
@@ -466,7 +464,7 @@ class OrderViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            // Items flow
+
             repository.getItemsFlow()
                 .collect { items ->
                     _items.value = items
@@ -474,14 +472,14 @@ class OrderViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            // Employee names flow
+
             repository.getEmployeeNamesFlow()
                 .collect { employeeNames ->
                     _employeeNames.value = employeeNames
                 }
         }
 
-        // Combined flow for orders (depends on items and employee names)
+
         viewModelScope.launch {
             combine(
                 repository.getItemsFlow(),
@@ -504,14 +502,6 @@ class OrderViewModel : ViewModel() {
             }
         }
     }
-
-    // Change selected date and update orders
-    fun changeSelectedDate(selectedDate: LocalDate) {
-        val selectedDateFormatted = formatDateKMP(selectedDate)
-        _selectedDate.value = selectedDateFormatted
-    }
-
-    // Original load function for initial setup or fallback
     fun loadAllData(selectedDate: LocalDate) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -555,9 +545,9 @@ suspend fun submitPrices(prices: Map<String, Int>, orderData: List<RestaurantOrd
 
                     println("🔧 Updating ${item.orderId} with price $price")
 
-                    db.collection("Neworders")
+                    db.collection(AppConstant.NEW_ORDERS)
                         .document(item.orderId)
-                        .update("price" to price)
+                        .update(AppConstant.PRICE to price)
                 }
             }
         }

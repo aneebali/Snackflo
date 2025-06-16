@@ -59,7 +59,7 @@ import com.salesflo.snackflo.DatePickerDemo
 import com.salesflo.snackflo.repository.EmployeeOrder
 import com.salesflo.snackflo.repository.OrderViewModel
 import com.salesflo.snackflo.repository.UserOrderSummary
-import com.salesflo.snackflo.repository.formatDateKMP
+import com.salesflo.snackflo.common.formatDateKMP
 import com.salesflo.snackflo.repository.getTodayOrderSummaryPerUser
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -70,7 +70,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun AdminDashboardScreen(onLogOut: () -> Unit,
-                         orderViewModel: OrderViewModel = viewModel(),
+                         orderViewModel: OrderViewModel = viewModel{OrderViewModel()},
                          ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var currentScreen by remember { mutableStateOf("Admin") }
@@ -126,7 +126,7 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(24.dp),
+                        .padding(horizontal =  24.dp, vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(20.dp))
@@ -487,10 +487,10 @@ fun ExpandableFoodListHeader(
         shadowElevation = 4.dp
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(horizontal =  20.dp, vertical = 10.dp)
         ) {
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Box(
                 modifier = Modifier.fillMaxWidth()
             ) {

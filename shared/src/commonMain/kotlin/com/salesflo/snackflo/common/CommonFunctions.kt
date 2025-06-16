@@ -1,4 +1,4 @@
-package com.salesflo.snackflo.repository
+package com.salesflo.snackflo.common
 
 import kotlinx.datetime.LocalDate
 
