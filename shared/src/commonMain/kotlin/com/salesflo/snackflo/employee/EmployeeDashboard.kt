@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -64,6 +65,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import com.salesflo.snackflo.repository.SelectedOrderItems
+import kotlinx.datetime.LocalDate
 
 
 @Composable
@@ -132,7 +134,7 @@ fun EmployeeFoodListScreen(
                 ) {
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Modern Avatar with gradient
+
                     Box(
                         modifier = Modifier
                             .size(100.dp)
@@ -222,80 +224,24 @@ fun EmployeeFoodListScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
-                .padding(horizontal =  15.dp, vertical = 10.dp)
-        ) {
-            Column {
+                .background(Color(0xFFF8F9FA))
+        ){
+            Column(   modifier = Modifier
+                .fillMaxSize()
+            ) {
+                Header(
+                    onDateSelected = { selectedDate = it },
+                    onLogOut = {
+                        scope.launch { drawerState.open() }
+                    },)
 
-                Spacer(modifier = Modifier.height(10.dp))
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Surface(
-                        onClick = { scope.launch { drawerState.open() } },
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFFF7F50).copy(alpha = 0.1f),
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = Color(0xFFFF7F50),
-                            modifier = Modifier.padding(12.dp)
-                        )
-                    }
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
 
-                Row(
-
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Orders for ${formatDateKMP(selectedDate)}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-
-                    Surface(
-                        modifier = Modifier
-                            .clickable {
-                                showDatePicker = true
-                            }
-                            .height(36.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFFFF7F50),
-                        tonalElevation = 4.dp,
-                        shadowElevation = 4.dp
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = "Filter by Date",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Filter",
-                                color = Color.White,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 14.sp
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Surface(
                     modifier = Modifier
+                        .padding(start = 16.dp)
                         .clickable { }
                         .height(36.dp),
                     shape = RoundedCornerShape(8.dp),
@@ -304,7 +250,7 @@ fun EmployeeFoodListScreen(
                     shadowElevation = 4.dp
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp,),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End
                     ) {
@@ -320,11 +266,21 @@ fun EmployeeFoodListScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally), color = Color(0xFFFF7F50))
                 } else if (orders.isEmpty()) {
-                    Text("No orders placed for this date.")
+                    Text("No orders placed for this date.",   modifier = Modifier.padding(16.dp))
                 } else {
-                    LazyColumn {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 14.dp,
+                            end = 14.dp,
+                            top = 5.dp,
+                            bottom = 5.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+
                         items(orders) { order ->
                             EmployeeOrderHistoryCard(
                                 title = order.itemName,
@@ -404,6 +360,111 @@ fun EmployeeOrderHistoryCard(
             }
         }
     }
+}
+
+
+@Composable
+fun Header(
+    onDateSelected: (LocalDate) -> Unit,
+    onLogOut: () -> Unit,
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    var selectedDate by remember {
+        mutableStateOf(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.White,
+        shadowElevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal =  20.dp, vertical = 10.dp)
+        ) {
+
+            Spacer(modifier = Modifier.height(10.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Surface(
+                    onClick = { onLogOut() },
+                    shape = RoundedCornerShape(12.dp),
+                    color =  Color(0xFFFF7F50).copy(alpha = 0.1f),
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        tint = Color(0xFFFF7F50),
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+
+                Text(
+                    text ="Dashboard",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color(0xFF2D3748),
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Orders",
+                        fontSize = 16.sp,
+                        color = Color(0xFF718096)
+                    )
+                    Text(
+                        text = formatDateKMP(selectedDate),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color(0xFF2D3748)
+                    )
+                }
+
+                Surface(
+                    onClick = { showDatePicker = true },
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFFFF7F50)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = "Filter by Date",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Filter",
+                            color = Color.White,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    DatePickerDemo(
+        showDialog = showDatePicker,
+        onDismiss = { showDatePicker = false },
+        onDateSelected = { date ->
+            selectedDate = date
+            onDateSelected(selectedDate)
+        }
+    )
 }
 
 

@@ -24,15 +24,10 @@ fun App() {
         StartupApp()
     }
 }
-
-
 @Composable
 fun StartupApp() {
 
-
     val navController = rememberNavController()
-
-
     NavHost(navController = navController, startDestination = "splash") {
         val isLoggedIn = AppPreferences.isLoggedIn
         composable("splash") {
@@ -48,8 +43,6 @@ fun StartupApp() {
                         navController.navigate(NavigationPaths.AdminScreen) {
                             popUpTo("splash") { inclusive = true }
                         }
-
-
                     }
 
                 } else {
@@ -58,13 +51,16 @@ fun StartupApp() {
                     }
                 }
             }
-
         }
 
         composable(NavigationPaths.LoginScreen) {
-
             LoginScreen(
-                onSignUpClick = { navController.navigate(NavigationPaths.CreateAccount) },
+                // FIX: Clear navigation stack when going to signup
+                onSignUpClick = {
+                    navController.navigate(NavigationPaths.CreateAccount) {
+                        popUpTo(NavigationPaths.LoginScreen) { inclusive = true }
+                    }
+                },
                 onForgotPassClick = { navController.navigate("Forgot Password") },
                 onLoginSuccess = { authResult: AuthResult ->
 
@@ -78,24 +74,31 @@ fun StartupApp() {
                     if (isEmployee) {
                         navController.navigate(NavigationPaths.Home) {
                             popUpTo(NavigationPaths.LoginScreen) { inclusive = true }
+                            launchSingleTop = true
                         }
 
                     } else {
                         navController.navigate(NavigationPaths.AdminScreen) {
                             popUpTo(NavigationPaths.LoginScreen) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
-
                 }
             )
         }
 
         composable(NavigationPaths.CreateAccount) {
             SignUpScreen(
-                onLoginClick = { navController.navigate(NavigationPaths.LoginScreen) },
+                // FIX: When going back to login, clear signup from stack
+                onLoginClick = {
+                    navController.navigate(NavigationPaths.LoginScreen) {
+                        popUpTo(NavigationPaths.CreateAccount) { inclusive = true }
+                    }
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
+
         composable("Forgot Password") {
             ForgotPasswordScreen(onBackClick = { navController.popBackStack() })
         }
@@ -113,9 +116,9 @@ fun StartupApp() {
                         launchSingleTop = true
                     }
                 },
-
-                )
+            )
         }
+
         composable(NavigationPaths.AdminScreen) {
             AdminDashboardScreen(
                 onLogOut = {
@@ -125,7 +128,6 @@ fun StartupApp() {
                         popUpTo(NavigationPaths.AdminScreen) { inclusive = true }
                         launchSingleTop = true
                     }
-
                 }
             )
         }
@@ -135,7 +137,6 @@ fun StartupApp() {
                 onArrowClick = { navController.popBackStack() }
             )
         }
-
     }
 }
 
