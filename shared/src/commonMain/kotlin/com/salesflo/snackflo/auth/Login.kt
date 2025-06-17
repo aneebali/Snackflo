@@ -3,6 +3,7 @@ package com.salesflo.snackflo.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -74,10 +76,15 @@ fun LoginScreen(onSignUpClick: () -> Unit,  onLoginSuccess: (AuthResult) -> Unit
     var passwordVisible by remember { mutableStateOf(false) }
     var deviceInfo by remember { mutableStateOf<FullDeviceInfo?>(null) }
 
-
+    val focusManager = LocalFocusManager.current
     Box(
         modifier = Modifier
-            .fillMaxSize().background(color = Color.White)
+            .fillMaxSize().background(color = Color.White).clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                focusManager.clearFocus()
+            }
     ) {
 
         Image(
