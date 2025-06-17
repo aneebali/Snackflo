@@ -219,7 +219,8 @@ fun RestaurantExpansionScreen(
 
             if (uiState.isLoading && restaurantsWithItems.isEmpty()) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = Color(0xFFFF7F50)
                 )
             }
 

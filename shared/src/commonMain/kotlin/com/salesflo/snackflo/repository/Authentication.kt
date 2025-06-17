@@ -62,6 +62,7 @@ object AuthFunc {
                 AppConstant.MOBILE to mobileNo,
                 AppConstant.PASSWORD to password,
                 AppConstant.USERTYPE to AppConstant.EMPLOYEE_TYPE,
+                AppConstant.DEVICE_INFO_FlAG to 1,
                 AppConstant.DEVICE_INFO to deviceName
             )
 

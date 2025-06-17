@@ -23,6 +23,7 @@ fun App() {
     MaterialTheme {
         StartupApp()
     }
+
 }
 @Composable
 fun StartupApp() {
@@ -55,7 +56,7 @@ fun StartupApp() {
 
         composable(NavigationPaths.LoginScreen) {
             LoginScreen(
-                // FIX: Clear navigation stack when going to signup
+
                 onSignUpClick = {
                     navController.navigate(NavigationPaths.CreateAccount) {
                         popUpTo(NavigationPaths.LoginScreen) { inclusive = true }

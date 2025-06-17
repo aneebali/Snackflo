@@ -183,15 +183,23 @@ fun RestaurantOrderScreen(
     val restaurantOrderData = remember(orderItems, restaurants, employeeNames) {
         groupOrdersByRestaurantAndEmployee(orderItems, restaurants, items, employeeNames)
     }
+//    val allPricesFilled = restaurantOrderData.all { restaurant ->
+//        restaurant.employeeOrders.all { emp ->
+//            emp.items.all { item ->
+//                val price = prices[item.orderId]?.toIntOrNull()
+//                price != null && price >= 0
+//            }
+//        }
+//    }
+
     val allPricesFilled = restaurantOrderData.all { restaurant ->
         restaurant.employeeOrders.all { emp ->
             emp.items.all { item ->
                 val price = prices[item.orderId]?.toIntOrNull()
-                price != null && price >= 0
+                price != null && price > 0
             }
         }
     }
-
     val anyPriceGreaterThanZero = prices.values.any {
         val price = it.toIntOrNull() ?: 0
         price > 0
@@ -248,7 +256,7 @@ fun RestaurantOrderScreen(
             }
         }
 
-        if (allPricesFilled && anyPriceGreaterThanZero && !submitted) {
+        if (allPricesFilled && !submitted) {
             Button(
                 onClick = {
                     val intPrices = prices.mapNotNull { (k, v) ->
@@ -268,6 +276,27 @@ fun RestaurantOrderScreen(
                 Text("Submit Price")
             }
         }
+
+//        if (allPricesFilled && anyPriceGreaterThanZero && !submitted) {
+//            Button(
+//                onClick = {
+//                    val intPrices = prices.mapNotNull { (k, v) ->
+//                        v.toIntOrNull()?.let { k to it }
+//                    }.toMap()
+//                    onSubmitPrices(intPrices, restaurantOrderData)
+//                    showToast("Prices submitted successfully")
+//                    submitted = true
+//                },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .align(Alignment.BottomCenter)
+//                    .padding(top = 10.dp, bottom = 30.dp, start = 10.dp, end = 10.dp)
+//                    .height(50.dp),
+//                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7F50))
+//            ) {
+//                Text("Submit Price")
+//            }
+//        }
     }
 }
 

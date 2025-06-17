@@ -214,13 +214,12 @@ fun SignUpScreen(
                                             mobileNo = mobileNo,
                                             password = password,
                                             deviceName = jsonString,
-                                            //  context,
                                             onSuccess = {
                                                 username = ""
                                                 mobileNo = ""
                                                 password = ""
+                                                onLoginClick()
 
-                                                onBackClick()
                                             },
                                             onFailure = {
                                                 username = ""
