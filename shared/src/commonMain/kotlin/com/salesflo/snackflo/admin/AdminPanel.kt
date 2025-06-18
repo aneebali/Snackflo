@@ -346,7 +346,7 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(start =  16.dp, end = 16.dp, bottom = 60.dp),
+                        .padding(start =  16.dp, end = 16.dp, bottom = 30.dp),
                     shape = RoundedCornerShape(10.dp),
                     color = Color(0xFFFF7F50),
                     shadowElevation = 8.dp

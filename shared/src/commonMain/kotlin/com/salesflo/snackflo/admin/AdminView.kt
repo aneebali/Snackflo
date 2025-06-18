@@ -259,9 +259,11 @@ fun RestaurantOrderScreen(
         if (allPricesFilled && !submitted) {
             Button(
                 onClick = {
-                    val intPrices = prices.mapNotNull { (k, v) ->
-                        v.toIntOrNull()?.let { k to it }
+                    val intPrices = prices.map { (k, v) ->
+                        val finalPrice = if (v.isBlank()) 0 else v.toInt()
+                        k to finalPrice
                     }.toMap()
+
                     onSubmitPrices(intPrices, restaurantOrderData)
                     showToast("Prices submitted successfully")
                     submitted = true
@@ -276,6 +278,28 @@ fun RestaurantOrderScreen(
                 Text("Submit Price")
             }
         }
+
+
+//        if (allPricesFilled && !submitted) {
+//            Button(
+//                onClick = {
+//                    val intPrices = prices.mapNotNull { (k, v) ->
+//                        v.toIntOrNull()?.let { k to it }
+//                    }.toMap()
+//                    onSubmitPrices(intPrices, restaurantOrderData)
+//                    showToast("Prices submitted successfully")
+//                    submitted = true
+//                },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .align(Alignment.BottomCenter)
+//                    .padding(top = 10.dp, bottom = 30.dp, start = 10.dp, end = 10.dp)
+//                    .height(50.dp),
+//                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7F50))
+//            ) {
+//                Text("Submit Price")
+//            }
+//        }
 
 //        if (allPricesFilled && anyPriceGreaterThanZero && !submitted) {
 //            Button(
@@ -495,17 +519,11 @@ fun ItemRow(
                             color = Color(0xFF6B7280),
                             fontWeight = FontWeight.Medium
                         )
-
                         BasicTextField(
                             value = currentPrice,
                             onValueChange = { newValue ->
                                 val filtered = newValue.filter { it.isDigit() }
-                                if (filtered != newValue) return@BasicTextField
-
-                                // Allow empty string or valid numbers
-                                val finalValue = if (filtered.isEmpty()) "0" else filtered
-                                println("TextField changed - OrderId: ${orderItem.orderId}, NewValue: $finalValue")
-                                onPriceChange(orderItem.orderId, finalValue)
+                                onPriceChange(orderItem.orderId, filtered)
                             },
                             textStyle = TextStyle(
                                 textAlign = TextAlign.End,
@@ -522,9 +540,9 @@ fun ItemRow(
                                 .width(70.dp)
                                 .padding(vertical = 12.dp, horizontal = 4.dp),
                             decorationBox = { innerTextField ->
-                                if (currentPrice == "0") {
+                                if (currentPrice.isEmpty()) {
                                     Text(
-                                        text = "0",
+                                        text = "",
                                         style = TextStyle(
                                             textAlign = TextAlign.End,
                                             fontSize = 16.sp,
@@ -536,6 +554,48 @@ fun ItemRow(
                                 innerTextField()
                             }
                         )
+
+
+//                        BasicTextField(
+//                            value = currentPrice,
+//                            onValueChange = { newValue ->
+//                                val filtered = newValue.filter { it.isDigit() }
+//                                if (filtered != newValue) return@BasicTextField
+//
+//                                // Allow empty string or valid numbers
+//                                val finalValue = if (filtered.isEmpty()) "0" else filtered
+//                                println("TextField changed - OrderId: ${orderItem.orderId}, NewValue: $finalValue")
+//                                onPriceChange(orderItem.orderId, finalValue)
+//                            },
+//                            textStyle = TextStyle(
+//                                textAlign = TextAlign.End,
+//                                fontSize = 16.sp,
+//                                fontWeight = FontWeight.SemiBold,
+//                                color = Color(0xFF1A1A1A)
+//                            ),
+//                            keyboardOptions = KeyboardOptions(
+//                                keyboardType = KeyboardType.Number,
+//                                imeAction = ImeAction.Done
+//                            ),
+//                            singleLine = true,
+//                            modifier = Modifier
+//                                .width(70.dp)
+//                                .padding(vertical = 12.dp, horizontal = 4.dp),
+//                            decorationBox = { innerTextField ->
+//                                if (currentPrice == "0") {
+//                                    Text(
+//                                        text = "0",
+//                                        style = TextStyle(
+//                                            textAlign = TextAlign.End,
+//                                            fontSize = 16.sp,
+//                                            color = Color(0xFFCCCCCC)
+//                                        ),
+//                                        modifier = Modifier.fillMaxWidth()
+//                                    )
+//                                }
+//                                innerTextField()
+//                            }
+//                        )
                     }
                 }
             }
