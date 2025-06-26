@@ -31,10 +31,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import dev.gitlive.firebase.firestore.firestore
 
 class EmployeeViewModel : ViewModel() {
     fun submitSelectedOrder(
@@ -614,107 +610,19 @@ suspend fun submitPrices(prices: Map<String, Int>, orderData: List<RestaurantOrd
 }
 
 
-suspend fun submitPrices455(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
+suspend fun loadFinancialSummary(onResult: (Int, Int) -> Unit) {
     val db = Firebase.firestore
+    try {
+        val depositDocs = db.collection("deposits").get().documents
+        val depositSum = depositDocs.sumOf { it.get<Int>("initialAmount") ?: 0 }
 
-    for (restaurant in orderData) {
-        for (emp in restaurant.employeeOrders) {
-            for (item in emp.items) {
-                val price = prices[item.orderId] ?: 0
+        val orderDocs = db.collection("Neworders").get().documents
+        val spentSum = orderDocs.sumOf { it.get<Int>("price") ?: 0 }
 
-                println("Updating ${item.orderId} with price $price")
-
-                db.collection(AppConstant.NEW_ORDERS)
-                    .document(item.orderId)
-                    .update(mapOf(AppConstant.PRICE to price))
-            }
-        }
-    }
-}
-
-suspend fun submitPrices90(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
-    val db = Firebase.firestore
-
-    orderData.forEach { restaurant ->
-        restaurant.employeeOrders.forEach { emp ->
-            emp.items.forEach { item ->
-                val price = prices[item.orderId] ?: 0
-
-                // Skip if price is invalid or zero
-//                if (price <= 0) {
-//                    println("⚠️ Skipping ${item.orderId} due to invalid price: $price")
-//                    return@forEach
-//                }
-
-                println("✅ Updating ${item.orderId} with price $price")
-                db.collection(AppConstant.NEW_ORDERS)
-                    .document(item.orderId)
-                    .update(AppConstant.PRICE to price)
-            }
-        }
-    }
-}
-
-suspend fun submitPrices56(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
-    val db = Firebase.firestore
-    println(orderData.size)
-
-    orderData.forEach { restaurant ->
-        restaurant.employeeOrders.forEach { emp ->
-            emp.items.forEach { item ->
-                println(item.orderId)
-                val key = "${restaurant.restaurant.id}_${emp.empId}_${item.Itemid}"
-                prices[item.orderId]?.let { price ->
-
-                    println("🔧 Updating ${item.orderId} with price $price")
-
-                    db.collection(AppConstant.NEW_ORDERS)
-                        .document(item.orderId)
-                        .update(AppConstant.PRICE to price)
-                }
-            }
-        }
-    }
-}
-
-suspend fun submitPrices23(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
-    val db = Firebase.firestore
-
-    orderData.forEach { restaurant ->
-        restaurant.employeeOrders.forEach { emp ->
-            emp.items.forEach { item ->
-                val key = "${restaurant.restaurant.id}_${emp.empId}_${item.Itemid}"
-                prices[item.orderId]?.let { price ->
-                    println("🔧 Updating ${item.orderId} with price $price")
-
-                    db.collection(AppConstant.NEW_ORDERS)
-                        .document(item.orderId)
-                        .update(AppConstant.PRICE to price)
-                }
-            }
-        }
-    }
-}
-
-suspend fun submitPrices1(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
-    val db = Firebase.firestore
-
-
-    orderData.forEach { restaurant ->
-        restaurant.employeeOrders.forEach { emp ->
-            emp.items.forEach { item ->
-
-                val key = "${restaurant.restaurant.id}_${emp.empId}_${item.Itemid}"
-                prices[item.orderId]?.let { price ->
-
-                    println("🔧 Updating ${item.orderId} with price $price")
-
-                    db.collection(AppConstant.NEW_ORDERS)
-                        .document(item.orderId)
-                        .update(AppConstant.PRICE to price)
-                }
-            }
-        }
+        onResult(depositSum, spentSum)
+    } catch (e: Exception) {
+        println("Error: ${e.message}")
+        onResult(0, 0)
     }
 }
 

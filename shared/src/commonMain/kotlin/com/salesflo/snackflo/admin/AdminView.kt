@@ -189,10 +189,6 @@ fun RestaurantOrderScreen(
     val restaurantOrderData = remember(orderItems, restaurants, employeeNames) {
         groupOrdersByRestaurantAndEmployee(orderItems, restaurants, items, employeeNames)
     }
-
-
-
-
     val allPricesFilled = restaurantOrderData.all { restaurant ->
         restaurant.employeeOrders.all { emp ->
             emp.items.all { item ->

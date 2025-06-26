@@ -16,33 +16,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.salesflo.snackflo.repository.UserViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,23 +38,31 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.salesflo.snackflo.repository.Deposit
 import com.salesflo.snackflo.repository.GroupedOrder
 import com.salesflo.snackflo.repository.Order
+import com.salesflo.snackflo.repository.UserViewModel
+import com.salesflo.snackflo.repository.loadFinancialSummary
 import com.salesflo.snackflo.repository.updateInitialAmount
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -82,6 +78,18 @@ fun EmpListScreen(viewModel: UserViewModel = viewModel { UserViewModel() }) {
     val users = viewModel.employeeUsers
     val filteredUsers = users.filter {
         it.username?.contains(searchQuery.value, ignoreCase = true) == true
+    }
+    var totalDeposit by remember { mutableStateOf(0) }
+    var totalSpent by remember { mutableStateOf(0) }
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        loadFinancialSummary(
+            onResult = { deposit, spent ->
+                totalDeposit = deposit
+                totalSpent = spent
+                isLoading = false
+            }
+        )
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -113,6 +121,67 @@ fun EmpListScreen(viewModel: UserViewModel = viewModel { UserViewModel() }) {
             )
         )
 
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = "Total Remaining",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF718096)
+                        )
+                        Text(
+                            text = "Rs. ${totalDeposit - totalSpent}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFF7F50)
+                        )
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = "Total Deposit",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF718096)
+                        )
+                        Text(
+                            text = "Rs. ${totalDeposit}",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF008000)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row {
+                    Text(
+                        text = "Total Spent: ",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF718096)
+                    )
+                    Text(
+                        text = "Rs. $totalSpent",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Red,
+                    )
+                }
+            }
+        }
+
         LazyColumn(
             contentPadding = PaddingValues(horizontal =  16.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -127,6 +196,9 @@ fun EmpListScreen(viewModel: UserViewModel = viewModel { UserViewModel() }) {
                         viewModel.fetchUserDetails(userId)
                     }
                 }
+
+
+
 
                 EmployeeExpandableCard(
                     employeeName = user.username ?: "Unknown",
