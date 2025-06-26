@@ -1,5 +1,7 @@
 package com.salesflo.snackflo.common
 
+import com.salesflo.snackflo.repository.Deposit
+import com.salesflo.snackflo.repository.NewOrder
 import kotlinx.datetime.LocalDate
 
 fun formatDateKMP(date: LocalDate): String {
@@ -12,4 +14,9 @@ fun generateRandomId(length: Int = 20): String {
     return (1..length)
         .map { allowedChars.random() }
         .joinToString("")
+}
+
+sealed class DatedTransactionItem(val date: String) {
+    class OrderItem(val order: NewOrder) : DatedTransactionItem(order.date)
+    class DepositItem(val deposit: Deposit) : DatedTransactionItem(deposit.date)
 }

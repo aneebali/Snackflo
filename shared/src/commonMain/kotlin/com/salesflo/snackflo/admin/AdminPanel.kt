@@ -22,7 +22,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Note
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -68,10 +71,328 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 
+
+//fun AdminDashboardScreen(onLogOut: () -> Unit,
+//                         orderViewModel: OrderViewModel = viewModel{OrderViewModel()},
+//                         ) {
+//    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+//    var currentScreen by remember { mutableStateOf("Admin") }
+//
+//    val scope = rememberCoroutineScope()
+//
+//    var isLoading by remember { mutableStateOf(true) }
+//
+//    var selectedDate by remember {
+//        mutableStateOf(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
+//    }
+//
+//    var orders by remember { mutableStateOf<List<UserOrderSummary>>(emptyList()) }
+//    var totalPriceAll : Int = 0
+//
+//
+//    if(currentScreen == "EmployeeLedger"){
+//        LaunchedEffect(selectedDate) {
+//            isLoading = true
+//            getTodayOrderSummaryPerUser(
+//                date = selectedDate,
+//                onResult = {
+//                    println(orders)
+//                    orders = it
+//                    isLoading = false
+//                },
+//                onError = {
+//                    isLoading = false
+//                }
+//            )
+//        }
+//        totalPriceAll = orders.sumOf { it.totalPrice }
+//    }
+//
+//    ModalNavigationDrawer(
+//        drawerState = drawerState,
+//        gesturesEnabled = true,
+//        drawerContent = {
+//            ModalDrawerSheet(
+//                modifier = Modifier
+//                    .width(280.dp)
+//                    .background(
+//                        color = Color.White
+//
+////                        Brush.verticalGradient(
+////                            colors = listOf(
+////                                Color(0xFFFF7F50),
+////                                Color(0xFFFF6B35)
+////                            )
+////                        )
+//                    )
+//            ) {
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxHeight()
+//                        .padding(horizontal =  24.dp, vertical = 10.dp),
+//                    horizontalAlignment = Alignment.CenterHorizontally
+//                ) {
+//                    Spacer(modifier = Modifier.height(20.dp))
+//
+//                    // Modern Avatar with gradient
+//                    Box(
+//                        modifier = Modifier
+//                            .size(100.dp)
+//                            .clip(CircleShape)
+//                            .background(
+//                                Brush.radialGradient(
+//                                    colors = listOf(
+//                                        Color.White.copy(alpha = 0.3f),
+//                                        Color.White.copy(alpha = 0.1f)
+//                                    )
+//
+//                                )
+//                            )
+//                            .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape)
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.Person,
+//                            contentDescription = "Avatar",
+//                            modifier = Modifier
+//                                .align(Alignment.Center)
+//                                .size(50.dp),
+//                            tint = Color.Black
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(20.dp))
+//
+//                    val name = AppPreferences.userName
+//
+//                    Text(
+//                        text = name,
+//                        fontWeight = FontWeight.Bold,
+//                        fontSize = 20.sp,
+//                        color = Color.Black
+//                    )
+//
+//                    Text(
+//                        text = "Admin",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = Color.Black.copy(alpha = 0.8f),
+//                        fontSize = 14.sp
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//                    Text(
+//                        text = "Dashboard",
+//                        fontSize = 16.sp,
+//                        color =Color.Black,
+//                        modifier = Modifier
+//                            .clickable {  scope.launch { drawerState.close() }
+//                                currentScreen = "Admin"
+//                              //  onDashboardClick()
+//                            }
+//                            .padding(vertical = 4.dp)
+//                    )
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//
+//                    Text(
+//                        text = "Employee Ledger",
+//                        fontSize = 16.sp,
+//                        color =Color.Black,
+//                        modifier = Modifier
+//                            .clickable {  scope.launch { drawerState.close() }
+//                               // onLedgerClick()
+//                                currentScreen = "EmployeeLedger"
+//                            }
+//                            .padding(vertical = 4.dp)
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//                    Spacer(modifier = Modifier.weight(1f))
+//
+//                    // Modern logout button
+//                    Surface(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .clickable {
+//                                scope.launch { drawerState.close() }
+//                                onLogOut()
+//                            },
+//                        shape = RoundedCornerShape(16.dp),
+//                        color = Color(0xFFFF7F50)
+//                    ) {
+//                        Row(
+//                            modifier = Modifier
+//                                .padding(16.dp),
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            horizontalArrangement = Arrangement.Center
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Default.Logout,
+//                                contentDescription = "Logout",
+//                                tint = Color.White,
+//                                modifier = Modifier.size(20.dp)
+//                            )
+//                            Spacer(modifier = Modifier.width(12.dp))
+//                            Text(
+//                                text = "Sign Out",
+//                                color = Color.White,
+//                                fontWeight = FontWeight.Medium,
+//                                fontSize = 16.sp
+//                            )
+//                        }
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(20.dp))
+//                }
+//            }
+//        }
+//    ) {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .background(Color(0xFFF8F9FA))
+//        ) {
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                   // .padding(bottom = if (totalPriceAll != 0) 100.dp else 0.dp)
+//            ) {
+//                ExpandableFoodListHeader(
+//                    selectedDate = selectedDate,
+//                    onDateSelected = { selectedDate = it },
+//                    onLogOut = {
+//                        scope.launch { drawerState.open() }
+//                    },
+//                    totalPriceAll = totalPriceAll,
+//                    currentScreen = currentScreen
+//                )
+//                when {
+//                    currentScreen == "EmployeeLedger" && isLoading -> {
+//                        // Loading indicator
+//                        Box(
+//                            modifier = Modifier.fillMaxSize(),
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                                CircularProgressIndicator(
+//                                    color = Color(0xFFFF7F50),
+//                                    strokeWidth = 3.dp
+//                                )
+//                                Spacer(modifier = Modifier.height(16.dp))
+//                                Text(
+//                                    text = "Loading orders...",
+//                                    color = Color.Gray,
+//                                    fontSize = 14.sp
+//                                )
+//                            }
+//                        }
+//                    }
+//
+//                    currentScreen == "EmployeeLedger" && orders.isEmpty() -> {
+//                        Column(
+//                            modifier = Modifier
+//                                .fillMaxSize()
+//                                .padding(32.dp),
+//                            horizontalAlignment = Alignment.CenterHorizontally,
+//                            verticalArrangement = Arrangement.Center
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Default.Receipt,
+//                                contentDescription = null,
+//                                modifier = Modifier.size(80.dp),
+//                                tint = Color(0xFFE0E0E0)
+//                            )
+//                            Spacer(modifier = Modifier.height(16.dp))
+//                            Text(
+//                                text = "No orders found",
+//                                style = MaterialTheme.typography.titleMedium,
+//                                color = Color(0xFF666666),
+//                                fontWeight = FontWeight.Medium
+//                            )
+//                            Text(
+//                                text = "Orders for this date will appear here",
+//                                style = MaterialTheme.typography.bodyMedium,
+//                                color = Color(0xFF999999),
+//                                textAlign = TextAlign.Center
+//                            )
+//                        }
+//                    }
+//
+//                    currentScreen == "Admin" -> {
+//                        OrderManagementScreen(viewModel = orderViewModel, selectedDate)
+//
+//                    }
+//
+//                    currentScreen == "EmployeeLedger" -> {
+//                        LazyColumn(
+//                            modifier = Modifier.fillMaxSize(),
+//                            contentPadding = PaddingValues(
+//                                start = 16.dp,
+//                                end = 16.dp,
+//                                top = 16.dp,
+//                                bottom = 140.dp
+//                            ),
+//                            verticalArrangement = Arrangement.spacedBy(12.dp)
+//                        ) {
+//                            items(orders) { orderSummary ->
+//                                UserSummaryCard(orderSummary)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // Modern bottom total bar
+//            if (totalPriceAll != 0) {
+//                Surface(
+//                    modifier = Modifier
+//                        .align(Alignment.BottomCenter)
+//                        .fillMaxWidth()
+//                        .padding(start =  16.dp, end = 16.dp, bottom = 30.dp),
+//                    shape = RoundedCornerShape(10.dp),
+//                    color = Color(0xFFFF7F50),
+//                    shadowElevation = 8.dp
+//                ) {
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(10.dp),
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        Column {
+//                            Text(
+//                                text = "Total",
+//                                color = Color.White.copy(alpha = 0.8f),
+//                                fontSize = 12.sp,
+//                                fontWeight = FontWeight.Medium
+//                            )
+//                            Text(
+//                                text = "Rs. $totalPriceAll",
+//                                color = Color.White,
+//                                fontWeight = FontWeight.Bold,
+//                                fontSize = 20.sp
+//                            )
+//                        }
+////                        Icon(
+////                            imageVector = Icons.Default.TrendingUp,
+////                            contentDescription = null,
+////                            tint = Color.White,
+////                            modifier = Modifier.size(24.dp)
+////                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+
 @Composable
-fun AdminDashboardScreen(onLogOut: () -> Unit,
-                         orderViewModel: OrderViewModel = viewModel{OrderViewModel()},
-                         ) {
+fun AdminDashboardScreen(
+    onLogOut: () -> Unit,
+    orderViewModel: OrderViewModel = viewModel { OrderViewModel() },
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var currentScreen by remember { mutableStateOf("Admin") }
 
@@ -84,10 +405,9 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
     }
 
     var orders by remember { mutableStateOf<List<UserOrderSummary>>(emptyList()) }
-    var totalPriceAll : Int = 0
+    var totalPriceAll: Int = 0
 
-
-    if(currentScreen == "EmployeeLedger"){
+    if (currentScreen == "EmployeeLedger") {
         LaunchedEffect(selectedDate) {
             isLoading = true
             getTodayOrderSummaryPerUser(
@@ -112,21 +432,12 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
             ModalDrawerSheet(
                 modifier = Modifier
                     .width(280.dp)
-                    .background(
-                        color = Color.White
-
-//                        Brush.verticalGradient(
-//                            colors = listOf(
-//                                Color(0xFFFF7F50),
-//                                Color(0xFFFF6B35)
-//                            )
-//                        )
-                    )
+                    .background(color = Color.White)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(horizontal =  24.dp, vertical = 10.dp),
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(20.dp))
@@ -142,7 +453,6 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
                                         Color.White.copy(alpha = 0.3f),
                                         Color.White.copy(alpha = 0.1f)
                                     )
-
                                 )
                             )
                             .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape)
@@ -175,35 +485,112 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
                         fontSize = 14.sp
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    Text(
-                        text = "Dashboard",
-                        fontSize = 16.sp,
-                        color =Color.Black,
-                        modifier = Modifier
-                            .clickable {  scope.launch { drawerState.close() }
-                                currentScreen = "Admin"
-                              //  onDashboardClick()
+                    // Menu Items
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Dashboard Menu Item
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    scope.launch { drawerState.close() }
+                                    currentScreen = "Admin"
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (currentScreen == "Admin") Color(0xFFFF7F50).copy(alpha = 0.1f) else Color.Transparent
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Dashboard,
+                                    contentDescription = "Dashboard",
+                                    tint = if (currentScreen == "Admin") Color(0xFFFF7F50) else Color.Black,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = "Dashboard",
+                                    fontSize = 16.sp,
+                                    color = if (currentScreen == "Admin") Color(0xFFFF7F50) else Color.Black,
+                                    fontWeight = if (currentScreen == "Admin") FontWeight.Bold else FontWeight.Normal
+                                )
                             }
-                            .padding(vertical = 4.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                        }
 
-
-                    Text(
-                        text = "Employee Ledger",
-                        fontSize = 16.sp,
-                        color =Color.Black,
-                        modifier = Modifier
-                            .clickable {  scope.launch { drawerState.close() }
-                               // onLedgerClick()
-                                currentScreen = "EmployeeLedger"
+                        // Employee Ledger Menu Item
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    scope.launch { drawerState.close() }
+                                    currentScreen = "EmployeeLedger"
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (currentScreen == "EmployeeLedger") Color(0xFFFF7F50).copy(alpha = 0.1f) else Color.Transparent
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Receipt,
+                                    contentDescription = "Employee Ledger",
+                                    tint = if (currentScreen == "EmployeeLedger") Color(0xFFFF7F50) else Color.Black,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = "Employee Ledger",
+                                    fontSize = 16.sp,
+                                    color = if (currentScreen == "EmployeeLedger") Color(0xFFFF7F50) else Color.Black,
+                                    fontWeight = if (currentScreen == "EmployeeLedger") FontWeight.Bold else FontWeight.Normal
+                                )
                             }
-                            .padding(vertical = 4.dp)
-                    )
+                        }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        // Deposit Menu Item
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    scope.launch { drawerState.close() }
+                                    currentScreen = "Deposit"
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (currentScreen == "Deposit") Color(0xFFFF7F50).copy(alpha = 0.1f) else Color.Transparent
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AccountBalance,
+                                    contentDescription = "Deposit",
+                                    tint = if (currentScreen == "Deposit") Color(0xFFFF7F50) else Color.Black,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = "Deposit",
+                                    fontSize = 16.sp,
+                                    color = if (currentScreen == "Deposit") Color(0xFFFF7F50) else Color.Black,
+                                    fontWeight = if (currentScreen == "Deposit") FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
 
                     Spacer(modifier = Modifier.weight(1f))
 
@@ -251,19 +638,52 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
                 .background(Color(0xFFF8F9FA))
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                   // .padding(bottom = if (totalPriceAll != 0) 100.dp else 0.dp)
+                modifier = Modifier.fillMaxSize()
             ) {
-                ExpandableFoodListHeader(
-                    selectedDate = selectedDate,
-                    onDateSelected = { selectedDate = it },
-                    onLogOut = {
-                        scope.launch { drawerState.open() }
-                    },
-                    totalPriceAll = totalPriceAll,
-                    currentScreen = currentScreen
-                )
+                // Header with conditional visibility
+                if (currentScreen != "Deposit") {
+                    ExpandableFoodListHeader(
+                        selectedDate = selectedDate,
+                        onDateSelected = { selectedDate = it },
+                        onLogOut = {
+                            scope.launch { drawerState.open() }
+                        },
+                        totalPriceAll = totalPriceAll,
+                        currentScreen = currentScreen
+                    )
+                } else {
+                    // Simple header for Deposit screen
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White,
+                        shadowElevation = 4.dp
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = { scope.launch { drawerState.open() } }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu",
+                                    tint = Color(0xFFFF7F50)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Employee Deposits",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+
                 when {
                     currentScreen == "EmployeeLedger" && isLoading -> {
                         // Loading indicator
@@ -318,7 +738,6 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
 
                     currentScreen == "Admin" -> {
                         OrderManagementScreen(viewModel = orderViewModel, selectedDate)
-
                     }
 
                     currentScreen == "EmployeeLedger" -> {
@@ -337,16 +756,20 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
                             }
                         }
                     }
+
+                    currentScreen == "Deposit" -> {
+                        EmpListScreen()
+                    }
                 }
             }
 
             // Modern bottom total bar
-            if (totalPriceAll != 0) {
+            if (totalPriceAll != 0 && currentScreen == "EmployeeLedger") {
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(start =  16.dp, end = 16.dp, bottom = 30.dp),
+                        .padding(start = 16.dp, end = 16.dp, bottom = 30.dp),
                     shape = RoundedCornerShape(10.dp),
                     color = Color(0xFFFF7F50),
                     shadowElevation = 8.dp
@@ -372,12 +795,6 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
                                 fontSize = 20.sp
                             )
                         }
-//                        Icon(
-//                            imageVector = Icons.Default.TrendingUp,
-//                            contentDescription = null,
-//                            tint = Color.White,
-//                            modifier = Modifier.size(24.dp)
-//                        )
                     }
                 }
             }
@@ -385,87 +802,6 @@ fun AdminDashboardScreen(onLogOut: () -> Unit,
     }
 }
 
-
-
-@Composable
-fun EmployeeOrderItem(order: EmployeeOrder) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFF7FAFC),
-        tonalElevation = 1.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = order.employeeName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color(0xFF2D3748)
-                )
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFFFFA07A).copy(alpha = 0.1f)
-                ) {
-                    Text(
-                        text = "Rs. ${(order.quantity) *  (order.price)}",
-                        color = Color.Black,
-                            //Color(0xFF38A169),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Restaurant,
-                    contentDescription = null,
-                    tint = Color(0xFF718096),
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Quantity: ${order.quantity}",
-                    color = Color(0xFF718096),
-                    fontSize = 14.sp
-                )
-            }
-
-            if (!order.note.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Note,
-                        contentDescription = null,
-                        tint = Color(0xFF718096),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = order.note,
-                        color = Color(0xFF718096),
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun ExpandableFoodListHeader(

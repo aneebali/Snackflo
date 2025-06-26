@@ -1,8 +1,11 @@
 package com.salesflo.snackflo.repository
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salesflo.snackflo.common.AppConstant
+import com.salesflo.snackflo.common.DatedTransactionItem
 import com.salesflo.snackflo.common.formatDateKMP
 import com.salesflo.snackflo.common.generateRandomId
 import dev.gitlive.firebase.Firebase
@@ -11,6 +14,7 @@ import dev.gitlive.firebase.firestore.FirebaseFirestore
 import dev.gitlive.firebase.firestore.firestore
 import dev.gitlive.firebase.firestore.where
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -27,7 +31,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
-
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import dev.gitlive.firebase.firestore.firestore
 
 class EmployeeViewModel : ViewModel() {
     fun submitSelectedOrder(
@@ -66,7 +73,6 @@ class EmployeeViewModel : ViewModel() {
         }
     }
 }
-
 
 
 suspend fun getTodayOrderSummaryPerUser(
@@ -167,6 +173,7 @@ fun getOrdersForUserByDate(
                 val baseOrder = doc.data<SelectedOrderItems>()
 
                 val itemId = doc.get<String>(AppConstant.ITEM_ID) ?: ""
+                val categoryId = doc.get<Int>(AppConstant.CATEGORY_ID) ?: 0
                 var itemName = ""
                 var itemPrice = 0
                 var itemImage = ""
@@ -178,16 +185,20 @@ fun getOrdersForUserByDate(
                     itemName = itemDoc.get<String>(AppConstant.ITEM_NAME) ?: ""
                     itemImage = itemDoc.get<String>(AppConstant.ITEM_IMAGE) ?: ""
                 }
-
+                val ctName = db.collection(AppConstant.RESTAURANT)
+                    .where(AppConstant.RESTAURANT_ID, equalTo = categoryId)
+                    .get()
+                val categoryName = ctName.documents.firstOrNull()?.get<String>(AppConstant.RESTAURANT_NAME) ?: "Unknown Category"
                 val updatedOrder = baseOrder.copy(
                     itemName = itemName,
-                    image = itemImage
+                    image = itemImage,
+                    categoryName = categoryName
                 )
 
                 orders.add(updatedOrder)
             }
 
-            println(orders)
+
             onResult(orders)
         } catch (e: Exception) {
             println("error")
@@ -199,6 +210,39 @@ fun getOrdersForUserByDate(
 
 
 
+suspend fun storeUnitOptions(unit: String, options: List<String>) {
+    try {
+        val firestore = Firebase.firestore
+        val data = mapOf("options" to options)
+
+        firestore.collection("unitOptions").document(unit.lowercase()).set(data)
+        println("Options stored successfully for unit: $unit")
+    } catch (e: Exception) {
+        println("Error storing unit options: ${e.message}")
+    }
+}
+
+
+suspend fun fetchUnitOptionsFromFirebase(
+    unit: String,
+    onResult: (List<String>) -> Unit
+) {
+    try {
+        val snapshot = Firebase.firestore.collection("unitOptions").document(unit).get()
+
+        if (snapshot.exists) {
+            val unitOptions = snapshot.data<UnitOptions>()
+            println("Fetched options: ${unitOptions.options}")
+            onResult(unitOptions.options)
+        } else {
+            println("Document not found.")
+            onResult(emptyList())
+        }
+    } catch (e: Exception) {
+        println("Error fetching unit options: ${e.message}")
+        onResult(emptyList())
+    }
+}
 
 fun groupOrdersByRestaurantAndEmployee(
     orderItems: List<SelectedOrderItems>,
@@ -537,7 +581,81 @@ class OrderViewModel : ViewModel() {
         }
     }
 }
+
+
+
 suspend fun submitPrices(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
+    val db = Firebase.firestore
+
+    coroutineScope {
+        val tasks = mutableListOf<Deferred<Unit>>()
+
+        for (restaurant in orderData) {
+            for (emp in restaurant.employeeOrders) {
+                for (item in emp.items) {
+                    val price = prices[item.orderId] ?: 0
+
+                    println("Updating ${item.orderId} with price $price")
+
+                    val task = async {
+                        db.collection(AppConstant.NEW_ORDERS)
+                            .document(item.orderId)
+                            .update(mapOf(AppConstant.PRICE to price))
+                    }
+
+                    tasks.add(task)
+                }
+            }
+        }
+
+        // Run all updates in parallel
+        tasks.awaitAll()
+    }
+}
+
+
+suspend fun submitPrices455(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
+    val db = Firebase.firestore
+
+    for (restaurant in orderData) {
+        for (emp in restaurant.employeeOrders) {
+            for (item in emp.items) {
+                val price = prices[item.orderId] ?: 0
+
+                println("Updating ${item.orderId} with price $price")
+
+                db.collection(AppConstant.NEW_ORDERS)
+                    .document(item.orderId)
+                    .update(mapOf(AppConstant.PRICE to price))
+            }
+        }
+    }
+}
+
+suspend fun submitPrices90(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
+    val db = Firebase.firestore
+
+    orderData.forEach { restaurant ->
+        restaurant.employeeOrders.forEach { emp ->
+            emp.items.forEach { item ->
+                val price = prices[item.orderId] ?: 0
+
+                // Skip if price is invalid or zero
+//                if (price <= 0) {
+//                    println("⚠️ Skipping ${item.orderId} due to invalid price: $price")
+//                    return@forEach
+//                }
+
+                println("✅ Updating ${item.orderId} with price $price")
+                db.collection(AppConstant.NEW_ORDERS)
+                    .document(item.orderId)
+                    .update(AppConstant.PRICE to price)
+            }
+        }
+    }
+}
+
+suspend fun submitPrices56(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
     val db = Firebase.firestore
     println(orderData.size)
 
@@ -559,5 +677,234 @@ suspend fun submitPrices(prices: Map<String, Int>, orderData: List<RestaurantOrd
     }
 }
 
+suspend fun submitPrices23(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
+    val db = Firebase.firestore
+
+    orderData.forEach { restaurant ->
+        restaurant.employeeOrders.forEach { emp ->
+            emp.items.forEach { item ->
+                val key = "${restaurant.restaurant.id}_${emp.empId}_${item.Itemid}"
+                prices[item.orderId]?.let { price ->
+                    println("🔧 Updating ${item.orderId} with price $price")
+
+                    db.collection(AppConstant.NEW_ORDERS)
+                        .document(item.orderId)
+                        .update(AppConstant.PRICE to price)
+                }
+            }
+        }
+    }
+}
+
+suspend fun submitPrices1(prices: Map<String, Int>, orderData: List<RestaurantOrderData>) {
+    val db = Firebase.firestore
+
+
+    orderData.forEach { restaurant ->
+        restaurant.employeeOrders.forEach { emp ->
+            emp.items.forEach { item ->
+
+                val key = "${restaurant.restaurant.id}_${emp.empId}_${item.Itemid}"
+                prices[item.orderId]?.let { price ->
+
+                    println("🔧 Updating ${item.orderId} with price $price")
+
+                    db.collection(AppConstant.NEW_ORDERS)
+                        .document(item.orderId)
+                        .update(AppConstant.PRICE to price)
+                }
+            }
+        }
+    }
+}
+
+
+suspend fun updateInitialAmount(userId: String, amount: Int, date : LocalDate) {
+    val firestore = Firebase.firestore
+    var id = generateRandomId()
+    val depositRef = firestore.collection(AppConstant.DEPOSIT_TABLE).document(id)
+
+    try {
+        depositRef.set(
+            mapOf(
+                AppConstant.USER_ID to userId,
+                AppConstant.INITIAL_AMOUNT to amount,
+                AppConstant.AMOUNT to 0,
+                AppConstant.DATE to formatDateKMP(date)
+            )
+        )
+//        if (snapshot.exists) {
+//            depositRef.set("initialAmount" to amount)
+//            depositRef.update("date" to formatDateKMP(selectedDate))
+//
+//        } else {
+//
+//        }
+    }catch (e: Exception) {
+        println("Error inserting deposit: ${e.message}")
+    }
+}
+class UserViewModel : ViewModel() {
+
+    private val _employeeUsers = mutableStateListOf<FirestoreUser>()
+    val employeeUsers: List<FirestoreUser> = _employeeUsers
+
+    private val _userOrders = mutableStateMapOf<String, List<Order>>()
+    val userOrders: Map<String, List<Order>> = _userOrders
+
+    private val _userDeposit = mutableStateMapOf<String, Deposit>()
+    val userDeposit: Map<String, Deposit> = _userDeposit
+
+    private val _isLoading = mutableStateMapOf<String, Boolean>()
+    val isLoading: Map<String, Boolean> = _isLoading
+
+    private val _userDeposits = mutableStateMapOf<String, List<Deposit>>()
+    val userDeposits: Map<String, List<Deposit>> = _userDeposits
+
+
+    init {
+        loadEmployees()
+    }
+
+    private fun loadEmployees() {
+        viewModelScope.launch {
+            try {
+                val snapshot = Firebase.firestore
+                    .collection(AppConstant.USERS)
+                    .where(AppConstant.USERTYPE, equalTo = AppConstant.EMPLOYEE_TYPE)
+                    .get()
+                val users = snapshot.documents.mapNotNull { doc ->
+                    doc.data<FirestoreUser>()?.copy(userId = doc.id)
+                }
+
+                _employeeUsers.clear()
+                _employeeUsers.addAll(users)
+            } catch (e: Exception) {
+                println("Error fetching employees: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchUserDetails(userId: String) {
+        _isLoading[userId] = true
+
+        viewModelScope.launch {
+            try {
+                try {
+                    val orderSnapshot1 = Firebase.firestore
+                        .collection(AppConstant.NEW_ORDERS)
+                        .where(AppConstant.USER_ID, equalTo = userId)
+                        .get()
+
+                    val orders = orderSnapshot1.documents.mapNotNull { doc ->
+                        val uid = doc.get<String>(AppConstant.USER_ID)
+                        val price = doc.get<Int>(AppConstant.PRICE)
+                        val date = doc.get<String>(AppConstant.DATE)
+
+                        if (uid != null && price != null && date != null) {
+                            Order(price = price, date = date)
+                        } else null // Skip incomplete docs
+                    }
+
+                    println("Parsed orders: ${orders.size}")
+                    _userOrders[userId] = orders
+
+                } catch (e: Exception) {
+                    println("Error fetching orders for user $userId: ${e.message}")
+                }
+
+                try {
+                    val depositsSnapshot = Firebase.firestore
+                        .collection(AppConstant.DEPOSIT_TABLE)
+                        .where(AppConstant.USER_ID, equalTo = userId)
+                        .get()
+
+                    val deposits = depositsSnapshot.documents.mapNotNull { doc ->
+                        val deposit = doc.data<Deposit>()
+                        deposit?.copy(userId = userId)
+                    }
+
+                    _userDeposits[userId] = deposits
+
+                    val totalInitialAmount = deposits.sumOf { it.initialAmount ?: 0 }
+                    _userDeposit[userId] = Deposit(userId = userId, initialAmount = totalInitialAmount)
+                } catch (e: Exception) {
+                    println("Error fetching deposits for user $userId: ${e.message}")
+                }
+            } catch (e: Exception) {
+                println("General error in fetchUserDetails: ${e.message}")
+            } finally {
+                _isLoading[userId] = false
+            }
+        }
+    }
+
+}
+
+suspend fun loadUserData(
+    userId: String,
+    callback: (Deposit?, List<DatedTransactionItem>, String?) -> Unit
+) {
+    try {
+        val firestore = Firebase.firestore
+
+        val depositsSnapshot = firestore
+            .collection(AppConstant.DEPOSIT_TABLE)
+            .where(AppConstant.USER_ID, equalTo = userId)
+            .get()
+
+        val depositDocs = depositsSnapshot.documents
+
+        val totalInitialAmount = depositDocs.mapNotNull { doc ->
+            doc.data<Deposit>().initialAmount
+        }.sum()
+
+        val ordersSnapshot = firestore
+            .collection(AppConstant.NEW_ORDERS)
+            .where(AppConstant.USER_ID, equalTo = userId)
+            .get()
+
+        val orders = ordersSnapshot.documents.mapNotNull { it.data<NewOrder>() }
+
+        val totalOrderAmount = orders.sumOf { it.price }
+        val updatedBalance = totalInitialAmount - totalOrderAmount
+
+        depositDocs.forEach { doc ->
+            val original = doc.data<Deposit>()
+            val updatedDeposit = Deposit(
+                userId = userId,
+                amount = updatedBalance,
+                initialAmount = original.initialAmount,
+                date = doc.get(AppConstant.DATE) ?: ""
+            )
+            firestore.collection(AppConstant.DEPOSIT_TABLE).document(doc.id).set(updatedDeposit)
+        }
+
+        val allItems = mutableListOf<DatedTransactionItem>()
+
+        orders.forEach {
+            allItems.add(DatedTransactionItem.OrderItem(it))
+        }
+
+        depositDocs.forEach { doc ->
+            val deposit = doc.data<Deposit>()
+            val date = doc.get<String>(AppConstant.DATE) ?: ""
+            allItems.add(DatedTransactionItem.DepositItem(deposit.copy(date = date)))
+        }
+
+        val sortedItems = allItems.sortedByDescending { it.date }
+
+        val resultDeposit = Deposit(
+            userId = userId,
+            initialAmount = totalInitialAmount,
+            amount = updatedBalance
+        )
+
+        callback(resultDeposit, sortedItems, null)
+
+    } catch (e: Exception) {
+        callback(null, emptyList(), "Error loading data: ${e.message}")
+    }
+}
 
 

@@ -28,6 +28,11 @@ object AppConstant {
     const val ITEM_NAME : String = "name"
     const val ITEM_IMAGE : String = "Image"
 
+    const val DEPOSIT_TABLE : String = "deposits"
+    const val AMOUNT : String = "amount"
+    const val INITIAL_AMOUNT : String = "initialAmount"
+
+
 
 
 

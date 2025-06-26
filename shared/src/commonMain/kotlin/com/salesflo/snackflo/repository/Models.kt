@@ -1,4 +1,5 @@
 package com.salesflo.snackflo.repository
+import com.salesflo.snackflo.common.DatedTransactionItem
 import kotlinx.serialization.Serializable
 
 data class UserOrderSummary(
@@ -17,6 +18,10 @@ data class EmployeeOrder(
     val price : Int,
     val note : String?
 )
+@Serializable
+data class UnitOptions(
+    val options: List<String> = emptyList()
+)
 
 
 @Serializable
@@ -31,7 +36,8 @@ data class SelectedOrderItems(
     val time : String = "",
     val empId : String = "",
     val categoryId : Int = 0,
-    val orderId : String = ""
+    val orderId : String = "",
+    val categoryName: String? = ""
 )
 
 @Serializable
@@ -79,3 +85,50 @@ data class RestaurantOrderData(
     val restaurant: Restaurant,
     val employeeOrders: List<EmployeeOrders>
 )
+
+
+data class DateOrderSummary(
+    val date: String,
+    val totalAmount: Int,
+    val orderCount: Int
+)
+
+@Serializable
+data class Deposit(
+    val userId: String = "",
+    val amount: Int = 0,
+    val initialAmount: Int = 0,
+    val date: String = ""
+)
+@Serializable
+data class FirestoreUser(
+    val userType: String? = null,
+    val userId: String? = null,
+    val username: String? = null,
+)
+
+data class Order(
+    val date: String = "",
+    val price: Int = 0
+)
+data class GroupedOrder(
+    val date: String?,
+    val totalPrice: Int,
+    val orderCount: Int
+)
+
+data class GroupedTransaction(
+    val date: String,
+    val orders: List<DatedTransactionItem.OrderItem>,
+    val deposits: List<DatedTransactionItem.DepositItem>,
+    val totalSpent: Int
+)
+
+@Serializable
+data class NewOrder(
+    val userId: String = "",
+    val date: String = "",
+    val price: Int = 0,
+    val orderDetails: String = ""
+)
+

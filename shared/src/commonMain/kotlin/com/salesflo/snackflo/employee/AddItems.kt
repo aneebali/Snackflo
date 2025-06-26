@@ -51,6 +51,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -74,6 +75,7 @@ import com.salesflo.snackflo.repository.Item
 import com.salesflo.snackflo.repository.RestaurantViewModel
 import com.salesflo.snackflo.repository.RestaurantWithItems
 import com.salesflo.snackflo.repository.SelectedOrderItems
+import com.salesflo.snackflo.repository.fetchUnitOptionsFromFirebase
 import com.salesflo.snackflo.showToast
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
@@ -202,7 +204,6 @@ fun RestaurantExpansionScreen(
                     }
                 }
             }
-
             RestaurantExpansionCards(
                 restaurantsWithItems = filteredList,
                 modifier = Modifier.fillMaxSize(),
@@ -299,7 +300,6 @@ fun RestaurantCard(
     onExpandToggle: (Int) -> Unit,
     onItemSelected: (SelectedOrderItems?) -> Unit,
     selectedItems: Map<String, SelectedOrderItems>,
-    modifier: Modifier = Modifier
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -426,16 +426,13 @@ fun ItemCard(
     onItemSelected: (SelectedOrderItems?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    fun getQuantityOptionsForUnit(unit: String): List<String> {
-        return when (unit.lowercase()) {
-            "paao" -> listOf("0", "0.5 kg", "1 kg", "1.5 kg", "2 kg", "2.5 kg", "3 kg")
-            "quantity" -> (0..10).map { it.toString() }
-            "half" -> listOf("0", "Half", "Full")
-            "kg" -> listOf("0", "1 paao", "1.5 paao", "0.5 kilo", "1 kilo", "1.5 kilo", "2 kilo")
-            else -> listOf("0", "1", "2", "3", "4", "5")
+    var unitOptions by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isLoadingOptions by remember { mutableStateOf(true) }
 
-
-            //BANANA SHAKE
+    LaunchedEffect(item.unit) {
+        fetchUnitOptionsFromFirebase(item.unit) { options ->
+            unitOptions = options
+            isLoadingOptions = false
         }
     }
 
@@ -480,7 +477,6 @@ fun ItemCard(
         )
     }
 
-
     fun LocalTime.withoutNanoseconds(): LocalTime =
         LocalTime(hour, minute, second)
 
@@ -497,8 +493,6 @@ fun ItemCard(
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     var expanded by remember { mutableStateOf(false) }
     var selectedQuantity by rememberSaveable { mutableStateOf(selectedOrder?.quantity ?: "0") }
-
-    val quantityOptions = getQuantityOptionsForUnit(item.unit)
 
     val id = AppPreferences.userId
 
@@ -531,13 +525,6 @@ fun ItemCard(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
-//                if (item.unit.isNotBlank()) {
-//                    Text(
-//                        text = "Unit: ${item.unit}",
-//                        style = MaterialTheme.typography.bodySmall,
-//                        color = Color.Gray
-//                    )
-//                }
             }
             Text(
                 text = "Qty:",
@@ -554,24 +541,26 @@ fun ItemCard(
                         contentDescription = "Select quantity"
                     )
                 }
-
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    quantityOptions.forEach { option ->
+                    unitOptions.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option) },
+                            text = {
+                                Text(
+                                    text = option,
+                                    color = Color(0xFF2D3748)
+                                )
+                            },
                             onClick = {
                                 selectedQuantity = option
                                 expanded = false
 
-                                val quantityValue = option
-
                                 val order = SelectedOrderItems(
                                     Itemid = item.id,
                                     price = 0,
-                                    quantity = quantityValue,
+                                    quantity = option,
                                     note = "",
                                     date = selectedDate.toString(),
                                     time = selectedTime.toString(),
@@ -588,5 +577,6 @@ fun ItemCard(
         }
     }
 }
+
 
 
