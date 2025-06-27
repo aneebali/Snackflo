@@ -191,27 +191,35 @@ fun DepositManagementScreen(
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(groupedItems) { groupedItem ->
                             Column {
-                                // Show ONE combined order card for all orders on this date
+
                                 if (groupedItem.orders.isNotEmpty()) {
                                     OrderCardNew(
                                         order = groupedItem.orders.first().order,
                                         date = groupedItem.date,
-                                        totalAmount = groupedItem.totalSpent // Total of all orders on this date
+                                        totalAmount = groupedItem.totalSpent
                                     )
                                     Spacer(modifier = Modifier.height(5.dp))
+                                }
+                                if (groupedItem.deposits.isNotEmpty()) {
+                                    groupedItem.deposits.forEach { depositItem ->
+                                        DepositCardNew(
+                                            deposit = depositItem.deposit,
+                                            date = groupedItem.date
+                                        )
+                                        Spacer(modifier = Modifier.height(5.dp))
+                                    }
                                 }
 
-                                // Show ONE combined deposit card for all deposits on this date
-                                if (groupedItem.deposits.isNotEmpty()) {
-                                    val totalDepositAmount = groupedItem.deposits.sumOf { it.deposit.initialAmount }
-                                    DepositCardNew(
-                                        deposit = groupedItem.deposits.first().deposit.copy(
-                                            initialAmount = totalDepositAmount
-                                        ),
-                                        date = groupedItem.date
-                                    )
-                                    Spacer(modifier = Modifier.height(5.dp))
-                                }
+//                                if (groupedItem.deposits.isNotEmpty()) {
+//                                    val totalDepositAmount = groupedItem.deposits.sumOf { it.deposit.initialAmount }
+//                                    DepositCardNew(
+//                                        deposit = groupedItem.deposits.first().deposit.copy(
+//                                            initialAmount = totalDepositAmount
+//                                        ),
+//                                        date = groupedItem.date
+//                                    )
+//                                    Spacer(modifier = Modifier.height(5.dp))
+//                                }
                             }
                         }
                     }
@@ -354,7 +362,7 @@ fun DepositCardNew(deposit: Deposit,  date: String ) {
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = "Rs. +${deposit.initialAmount}",
+                    text = if (deposit.initialAmount > 0) "Rs. +${deposit.initialAmount}" else "Rs. ${deposit.initialAmount}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF008000)

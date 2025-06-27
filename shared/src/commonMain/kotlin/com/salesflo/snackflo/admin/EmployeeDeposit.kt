@@ -62,7 +62,7 @@ import com.salesflo.snackflo.repository.Deposit
 import com.salesflo.snackflo.repository.GroupedOrder
 import com.salesflo.snackflo.repository.Order
 import com.salesflo.snackflo.repository.UserViewModel
-import com.salesflo.snackflo.repository.loadFinancialSummary
+import com.salesflo.snackflo.repository.loadFinancialSummaryRealtime
 import com.salesflo.snackflo.repository.updateInitialAmount
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -83,7 +83,7 @@ fun EmpListScreen(viewModel: UserViewModel = viewModel { UserViewModel() }) {
     var totalSpent by remember { mutableStateOf(0) }
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        loadFinancialSummary(
+        loadFinancialSummaryRealtime(
             onResult = { deposit, spent ->
                 totalDeposit = deposit
                 totalSpent = spent
@@ -196,9 +196,6 @@ fun EmpListScreen(viewModel: UserViewModel = viewModel { UserViewModel() }) {
                         viewModel.fetchUserDetails(userId)
                     }
                 }
-
-
-
 
                 EmployeeExpandableCard(
                     employeeName = user.username ?: "Unknown",
@@ -314,7 +311,10 @@ fun EmployeeExpandableCard(
                         OutlinedTextField(
                             value = inputAmount,
                             singleLine = true,
-                            onValueChange = { inputAmount = it.filter { ch -> ch.isDigit() } },
+                            onValueChange = { ch ->
+                                inputAmount = ch
+                                //  it.filter { ch -> ch.isDigit() }
+                            },
                             label = { Text("Amount (Rs.)", color = Color(0xFF718096)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
@@ -496,16 +496,27 @@ fun EmployeeExpandableCard(
                                             OrderDateCard(groupedOrder = groupedOrder)
                                         }
 
-
                                         groupedDepositsMap[date]?.let { depositsForDate ->
-                                            val totalDeposit = depositsForDate.sumOf { it.initialAmount ?: 0 }
-                                            val groupedDeposit = GroupedOrder(
-                                                date = date,
-                                                totalPrice = totalDeposit,
-                                                orderCount = depositsForDate.size
-                                            )
-                                            DepositDateCard(groupedDeposit = groupedDeposit) // You'll define this below
+                                            depositsForDate.forEach { deposit ->
+                                                val individualDeposit = GroupedOrder(
+                                                    date = date,
+                                                    totalPrice = deposit.initialAmount ?: 0,
+                                                    orderCount = 1
+                                                )
+                                                DepositDateCard(groupedDeposit = individualDeposit)
+                                            }
                                         }
+
+
+//                                        groupedDepositsMap[date]?.let { depositsForDate ->
+//                                            val totalDeposit = depositsForDate.sumOf { it.initialAmount ?: 0 }
+//                                            val groupedDeposit = GroupedOrder(
+//                                                date = date,
+//                                                totalPrice = totalDeposit,
+//                                                orderCount = depositsForDate.size
+//                                            )
+//                                            DepositDateCard(groupedDeposit = groupedDeposit) // You'll define this below
+//                                        }
                                     }
 
 //                                    if (allDates.size > 5) {

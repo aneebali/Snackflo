@@ -609,20 +609,17 @@ suspend fun submitPrices(prices: Map<String, Int>, orderData: List<RestaurantOrd
     }
 }
 
+suspend fun loadFinancialSummaryRealtime(onResult: (Int, Int) -> Unit) {
+    val db = dev.gitlive.firebase.Firebase.firestore
 
-suspend fun loadFinancialSummary(onResult: (Int, Int) -> Unit) {
-    val db = Firebase.firestore
-    try {
-        val depositDocs = db.collection("deposits").get().documents
-        val depositSum = depositDocs.sumOf { it.get<Int>("initialAmount") ?: 0 }
-
-        val orderDocs = db.collection("Neworders").get().documents
-        val spentSum = orderDocs.sumOf { it.get<Int>("price") ?: 0 }
-
+    val depositsFlow = db.collection("deposits").snapshots
+    val ordersFlow = db.collection("Neworders").snapshots
+    depositsFlow.combine(ordersFlow) { depositSnapshot, ordersSnapshot ->
+        val depositSum = depositSnapshot.documents.sumOf { it.get<Int>("initialAmount") ?: 0 }
+        val spentSum = ordersSnapshot.documents.sumOf { it.get<Int>("price") ?: 0 }
+        Pair(depositSum, spentSum)
+    }.collect { (depositSum, spentSum) ->
         onResult(depositSum, spentSum)
-    } catch (e: Exception) {
-        println("Error: ${e.message}")
-        onResult(0, 0)
     }
 }
 
@@ -641,13 +638,6 @@ suspend fun updateInitialAmount(userId: String, amount: Int, date : LocalDate) {
                 AppConstant.DATE to formatDateKMP(date)
             )
         )
-//        if (snapshot.exists) {
-//            depositRef.set("initialAmount" to amount)
-//            depositRef.update("date" to formatDateKMP(selectedDate))
-//
-//        } else {
-//
-//        }
     }catch (e: Exception) {
         println("Error inserting deposit: ${e.message}")
     }
